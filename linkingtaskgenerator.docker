@@ -1,0 +1,9 @@
+FROM java
+
+ADD target/LinkingBenchmark-1.0-SNAPSHOT.jar /LinkingBenchmark/LinkingBenchmark.jar
+
+WORKDIR /SpatialLinkingBenchmark
+
+CMD java -cp LinkingBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatiotemporalbenchmark.platformConnection.TaskGenerator
+
+

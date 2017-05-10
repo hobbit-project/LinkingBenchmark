@@ -1,5 +1,6 @@
 package org.hobbit.spatiotemporalbenchmark.util;
 
+import com.google.common.primitives.Doubles;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -29,6 +30,13 @@ public class AllocationsUtil {
         this.allocation = new ArrayList<Double>();
         this.random = random;
         calculateLimitsFromAllocations(allocations);
+    }
+
+    public AllocationsUtil(ArrayList<Double> allocations, Random random) {
+        this.limits = new double[allocations.size()];
+        this.allocation = allocations;
+        this.random = random;
+        calculateLimitsFromAllocations(Doubles.toArray(allocations));
     }
 
     private void calculateLimitsFromAllocations(double[] allocations) {

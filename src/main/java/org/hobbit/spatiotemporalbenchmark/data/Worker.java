@@ -8,10 +8,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-import org.hobbit.spatiotemporalbenchmark.main.Main;
 import org.apache.commons.io.FileUtils;
 import org.hobbit.spatiotemporalbenchmark.Trace;
+import static org.hobbit.spatiotemporalbenchmark.data.Generator.getAtomicLong;
+import static org.hobbit.spatiotemporalbenchmark.data.Generator.getConfigurations;
 import org.hobbit.spatiotemporalbenchmark.properties.Configurations;
 import org.hobbit.spatiotemporalbenchmark.util.FileUtil;
 import org.hobbit.spatiotemporalbenchmark.util.SesameUtils;
@@ -34,16 +34,21 @@ import org.openrdf.sail.memory.MemoryStore;
 
 public class Worker extends AbstractWorker {
 
-    protected long targetTriples;
     protected long totalTriplesForWorker;
     protected String destinationPath;
     protected String serializationFormat;
-    protected AtomicLong filesCount;
+//    protected AtomicLong filesCount;
+    private int numOfInstances;
 
-    public Worker(AtomicLong filesCount, String destinationPath, String serializationFormat) {
-        this.filesCount = filesCount;
-        this.destinationPath = destinationPath;
-        this.serializationFormat = serializationFormat;
+//    public Worker(AtomicLong filesCount, String destinationPath, String serializationFormat) {
+//        this.filesCount = filesCount;
+//        this.destinationPath = destinationPath;
+//        this.serializationFormat = serializationFormat;
+//    }
+    public Worker() {
+        this.numOfInstances = getConfigurations().getInt(Configurations.INSTANCES);
+        this.destinationPath = getConfigurations().getString(Configurations.DATASETS_PATH);
+        this.serializationFormat = getConfigurations().getString(Configurations.GENERATED_DATA_FORMAT);
     }
 
     @Override
@@ -81,26 +86,32 @@ public class Worker extends AbstractWorker {
         theFileOAEIGS.mkdirs();
         FileUtils.cleanDirectory(theFileOAEIGS);
 
-        long currentFilesCount = filesCount.incrementAndGet();
+        long currentFilesCount = getAtomicLong().incrementAndGet();
         String sourceFileName = String.format(SOURCE_FILENAME + rdfFormat.getDefaultFileExtension(), sourceDestination, File.separator, currentFilesCount);
         String targetFileName = String.format(TARGET_FILENAME + rdfFormat.getDefaultFileExtension(), targetDestination, File.separator, currentFilesCount);
         String gsFileName = String.format(GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), goldStandardDestination, File.separator, currentFilesCount);
         String extendedGSFileName = String.format(DETAILED_GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), detailedGoldStandardDestination, File.separator, currentFilesCount);
         String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), OAEIGoldStandardDestination, File.separator, currentFilesCount);
 
-        RDFFormat format = RDFFormat.TURTLE; //fix format based on mimicking
-        String path = Main.getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
-       
+        RDFFormat format = RDFFormat.TURTLE; //TODO: change this format based on mimicking algorithm later!
+        String path = getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
+
         List<File> collectedFiles = new ArrayList<File>();
         RepositoryConnection con = null;
-        FileUtil.collectFilesList(path, collectedFiles, "*", true);
 
-        int numOfInstances = Main.getConfigurations().getInt(Configurations.INSTANCES);
+        //TODO: if each file is not an instance any more on mimicking change this class
+        //each file is an instance
+        FileUtil.collectFilesList(path, collectedFiles, "*", true);
+//        System.out.println("numOfInstances 1 " + numOfInstances);
         if ((numOfInstances > collectedFiles.size()) || (numOfInstances == 0)) {
             numOfInstances = collectedFiles.size();
         }
         //oaei gold standard
-        OAEIRDFAlignmentFormat oaeiRDF = new OAEIRDFAlignmentFormat(oaeiGSFileName, sourceFileName, targetFileName);
+        OAEIRDFAlignmentFormat oaeiRDF = null;
+        //OAEIAlignmentOutput oaei = null;
+
+        oaeiRDF = new OAEIRDFAlignmentFormat(oaeiGSFileName, sourceFileName, targetFileName);
+        //oaei = new OAEIRDFAlignmentFormat(oaeiGSFileName, sourceFileName, targetFileName);
 
         try {
             sourceFos = new FileOutputStream(sourceFileName);
@@ -108,24 +119,26 @@ public class Worker extends AbstractWorker {
             gsFos = new FileOutputStream(gsFileName);
             detailedGSFos = new FileOutputStream(extendedGSFileName);
             oaeiGSFos = new FileOutputStream(oaeiGSFileName);
- 
-            for (int i = 0; i < numOfInstances; i++) {
+
+//            System.out.println("numOfInstances 2 " + numOfInstances);
+            for (int f = 0; f < numOfInstances; f++) {
                 Repository repository = new SailRepository(new MemoryStore());
                 con = null;
                 repository.initialize();
                 con = repository.getConnection();
-                con.add(collectedFiles.get(i), "", format);
-                System.out.println("i " + i + " " + collectedFiles.get(i).getName());
-
+                con.add(collectedFiles.get(f), "", format);
+                System.out.println("f " + f + " " + collectedFiles.get(f).getName());
                 //ids of traces for defined number of instances 
                 String queryNumInstances = "SELECT ?s WHERE {"
-                        + "?s  a  <http://www.tomtom.com/ontologies/traces#Trace> . }";
+                        + "?s  a  <http://www.tomtom.com/ontologies/traces#Trace> . }"
+                        + "LIMIT " + numOfInstances;
 
                 TupleQuery query = con.prepareTupleQuery(QueryLanguage.SPARQL, queryNumInstances);
                 TupleQueryResult result = query.evaluate();
 
                 BindingSet nextResult = result.next();
                 String traceID = nextResult.getBinding("s").getValue().stringValue();
+                System.out.println("traceID: " + traceID);
                 String queryString
                         = "CONSTRUCT{"
                         + "<" + traceID + ">  a  <http://www.tomtom.com/ontologies/traces#Trace> ."
@@ -149,6 +162,7 @@ public class Worker extends AbstractWorker {
 
                 GraphQueryResult graphResult = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString).evaluate();
                 Model resultsModel = QueryResults.asModel(graphResult);
+
                 CreateInstances create = new CreateInstances();
 
                 Model givenInstanceModel = new LinkedHashModel();
@@ -170,8 +184,8 @@ public class Worker extends AbstractWorker {
 
                             //write source instance here after applying points to label transformation if defined
                             Model model = new LinkedHashModel();
-                            for (int j = 0; j < sourceTrace.getPointsOfTrace().size(); j++) {
-                                model.addAll(sourceTrace.getPointsOfTrace().get(j));
+                            for (int i = 0; i < sourceTrace.getPointsOfTrace().size(); i++) {
+                                model.addAll(sourceTrace.getPointsOfTrace().get(i));
                             }
                             Rio.write(model, sourceFos, rdfFormat);
                             //target instance
@@ -194,6 +208,8 @@ public class Worker extends AbstractWorker {
                             Statement stGS = itGS.next();
                             try {
                                 oaeiRDF.addMapping2Output(stGS.getSubject().stringValue(), stGS.getObject().stringValue(), 0, 1.0);
+                                //oaei.addMapping2Output(stGS.getSubject().stringValue(), stGS.getObject().stringValue(), 0, 1.0);
+
                             } catch (Exception e1) {
                                 e1.printStackTrace();
                             }
@@ -202,9 +218,14 @@ public class Worker extends AbstractWorker {
                     }
                     givenInstanceModel.add(statement);
                 }
+
+//                finally {
+//                    con.close();
+//                }
             }
             try {
                 oaeiRDF.saveOutputFile();
+//              oaei.saveOutputFile();
             } catch (Exception e) {
                 e.printStackTrace();
             }

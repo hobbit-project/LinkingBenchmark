@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openrdf.model.Model;
+import org.openrdf.model.impl.LinkedHashModel;
 
 public class FileUtil {
 
@@ -24,6 +26,7 @@ public class FileUtil {
      * @param recurseFolders
      * @throws java.io.IOException
      */
+
     public static void collectFilesList(String startFolder, List<File> collectedFilesList, String fileExtFilter, boolean recurseFolders) throws IOException {
         File file = new File(startFolder);
         File[] filesList = file.listFiles();
@@ -32,12 +35,10 @@ public class FileUtil {
             if (f.isDirectory() && recurseFolders) {
                 collectFilesList(f.getAbsolutePath(), collectedFilesList, fileExtFilter, recurseFolders);
             } else //no filter
-            {
-                if (fileExtFilter.isEmpty() || fileExtFilter.equals("*")) {
-                    collectedFilesList.add(f);
-                } else if (fileExtFilter.equalsIgnoreCase(getFileExtension(f))) {
-                    collectedFilesList.add(f);
-                }
+            if (fileExtFilter.isEmpty() || fileExtFilter.equals("*")) {
+                collectedFilesList.add(f);
+            } else if (fileExtFilter.equalsIgnoreCase(getFileExtension(f))) {
+                collectedFilesList.add(f);
             }
         }
     }
@@ -54,5 +55,19 @@ public class FileUtil {
 
         return fileExtension;
     }
-
+    
+    public static void removeDirectory(File dir) {
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null && files.length > 0) {
+                for (File aFile : files) {
+                    removeDirectory(aFile);
+                }
+            }
+            dir.delete();
+        } else {
+            dir.delete();
+        }
+    }
+    
 }

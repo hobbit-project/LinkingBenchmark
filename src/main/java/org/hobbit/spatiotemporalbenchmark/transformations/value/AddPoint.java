@@ -31,6 +31,7 @@ public class AddPoint implements DataValueTransformation {
     }
 
     public Model pointBetween(Model m1, Model m2) {
+        System.out.println("adding point ");
         //equal can only call intermediate points 
 
         //simple case: if both points have coordinates

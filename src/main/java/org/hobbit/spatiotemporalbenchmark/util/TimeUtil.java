@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.hobbit.spatiotemporalbenchmark.main.Main.configurations;
+import static org.hobbit.spatiotemporalbenchmark.data.Generator.getConfigurations;
 import org.hobbit.spatiotemporalbenchmark.properties.Configurations;
 
 /**
@@ -28,7 +28,7 @@ public class TimeUtil {
     public String averageDateTime(String a, String b) {
         String midpointStr = null;
         try {
-            DateFormat formatter = new SimpleDateFormat(configurations.getString(Configurations.DATE_FORMAT));
+            DateFormat formatter = new SimpleDateFormat(getConfigurations().getString(Configurations.DATE_FORMAT));
             Date dateA = formatter.parse(a);
             Date dateB = formatter.parse(b);
 

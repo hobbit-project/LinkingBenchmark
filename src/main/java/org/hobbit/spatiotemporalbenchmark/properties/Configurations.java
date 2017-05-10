@@ -21,7 +21,6 @@ import java.util.Properties;
  */
 public class Configurations {
 
-    public static final String TOTAL_TRIPLES = "totalTriples";
     public static final String INSTANCES = "instances";
     public static final String ENDPOINT_URL = "endpointURL";
     public static final String DATASETS_PATH = "datasetsPath";
@@ -40,8 +39,7 @@ public class Configurations {
      * Initialise and set default values for parameters that make sense.
      */
     public Configurations() {
-        properties.setProperty(TOTAL_TRIPLES, "12345");
-        properties.setProperty(INSTANCES, "10");
+        properties.setProperty(INSTANCES, "11");
         properties.setProperty(ENDPOINT_URL, "");
         properties.setProperty(DATASETS_PATH, "./datasets");
         properties.setProperty(GIVEN_DATASETS_PATH, "./datasets/givenDatasets");
@@ -191,8 +189,11 @@ public class Configurations {
         return this.properties;
     }
 
-    public static void main(String[] args) throws IOException {
-        Configurations c = new Configurations();
-        c.saveToFile("default_config.properties");
+    public void setIntProperty(String key, int value) {
+        properties.setProperty(key, Integer.toString(value));
+    }
+
+    public void setStringProperty(String key, String value) {
+        properties.setProperty(key, value);
     }
 }

@@ -1,0 +1,19 @@
+
+
+FROM java
+
+ADD target/LinkingBenchmark-1.0-SNAPSHOT.jar /SpatialLinkingBenchmark/LinkingBenchmark.jar
+
+WORKDIR /LinkingBenchmark
+
+COPY test.properties /LinkingBenchmark/
+
+COPY definitions.properties /LinkingBenchmark/
+
+COPY datasets/* /LinkingBenchmark/datasets/
+
+COPY datasets/givenDatasets/* /LinkingBenchmark/datasets/givenDatasets/
+
+CMD java -cp LinkingBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatiotemporalbenchmark.platformConnection.DataGenerator
+
+

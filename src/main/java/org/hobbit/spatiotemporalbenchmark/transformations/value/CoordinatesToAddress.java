@@ -34,6 +34,9 @@ public class CoordinatesToAddress implements DataValueTransformation {
     }
 
     public String getAddress(double latitude, double longitude) {
+
+//        System.out.println("latitude " + latitude);
+//        System.out.println("longitude " + longitude);
         String strAddress = "";
         String point = latitude + "," + longitude;
         if (pointAddressMap.containsKey(point)) {
@@ -43,8 +46,7 @@ public class CoordinatesToAddress implements DataValueTransformation {
             if (strAddress.equals("")) {
                 googleMapsApiLimit = true;
             }
-        }       
-        else if (!foursquareApiLimit) {
+        } else if (!foursquareApiLimit) {
             strAddress = AddressFromFoursquareApi.getAddress(latitude, longitude);
             if (strAddress.equals("")) {
                 foursquareApiLimit = true;
@@ -55,6 +57,7 @@ public class CoordinatesToAddress implements DataValueTransformation {
                 nominatimLimit = true;
             }
         }
+//        System.out.println("strAddress "+strAddress);
         return strAddress;
     }
 
@@ -91,5 +94,4 @@ public class CoordinatesToAddress implements DataValueTransformation {
 //        String str = ga.getAddress(10.11674, 48.45084);
 //        System.out.println("1. " + str);
 //    }
-
 }

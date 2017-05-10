@@ -5,12 +5,10 @@
  */
 package org.hobbit.spatiotemporalbenchmark.data;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.hobbit.spatiotemporalbenchmark.Trace;
-import org.hobbit.spatiotemporalbenchmark.transformations.RelationsCall;
 import org.hobbit.spatiotemporalbenchmark.transformations.Transformation;
 import org.hobbit.spatiotemporalbenchmark.transformations.value.CoordinatesToAddress;
 import org.hobbit.spatiotemporalbenchmark.transformations.value.AddPoint;
@@ -31,7 +29,7 @@ import org.openrdf.model.vocabulary.XMLSchema;
  *
  * @author jsaveta
  */
-public class CreateInstances {
+public class CreateInstances extends Generator {
 
     private static Map<Resource, Resource> URIMap = new HashMap<Resource, Resource>(); //sourceURI, targetURI, this contains also th bnodes
     private RandomUtil ru = new RandomUtil();
@@ -46,7 +44,6 @@ public class CreateInstances {
     }
 
     public void sourceInstance(Model givenModel) {
-        RelationsCall call = new RelationsCall();
         //Model sourceModel = new LinkedHashModel();
         trace = new Trace();
         extendedTrace = new Trace();
@@ -57,8 +54,8 @@ public class CreateInstances {
         while (it.hasNext()) {
             Statement statement = it.next();
             if (statement.getPredicate().getLocalName().equals("lat")) {
-                call.valueSourceCases();
-                Transformation transform = call.getSourceTransformationConfigurations();
+                getRelationsCall().valueSourceCases();
+                Transformation transform = getRelationsCall().getSourceTransformationConfigurations();
                 if (transform != null) {
                     double latitude = Double.parseDouble(statement.getObject().stringValue());
                     Statement statementLAT = statement;
@@ -87,12 +84,12 @@ public class CreateInstances {
                 }
             } else {
                 if (statement.getPredicate().getLocalName().equals("hasPoint") || !it.hasNext()) {
-                    call.keepPointCases();
+                    getRelationsCall().keepPointCases();
                     if (!it.hasNext()) {
                         point.add(statement);
                         extendedPoint.add(statement);
                     }
-                    if (call.getKeepPoint()) { //check alloccation of config file for the percentage of points to keep
+                    if (getRelationsCall().getKeepPoint()) { //check alloccation of config file for the percentage of points to keep
                         trace.addPointsOfTrace(point);
                         extendedTrace.addPointsOfTrace(extendedPoint);
                     }
@@ -113,26 +110,21 @@ public class CreateInstances {
         //uri change, delete-add points,and value based changes
         Resource targetURI = null;
         Model targetModel = new LinkedHashModel();
-        RelationsCall call = new RelationsCall();
-        String relation = "Equal";  //no changes 
-        call.equalAndRealtionCases();
-        ArrayList<Transformation> EandRtr = call.getEqualAndRelationConfiguration();
 
-        if (EandRtr.size() == 1) { //equal or relation
-            relation = StringUtil.getClassName(EandRtr.get(0).getClass().toString());
-        }
-        if (EandRtr.size() == 2) { //equal and relation
-            relation = StringUtil.getClassName(EandRtr.get(0).getClass().toString()) + " and " + StringUtil.getClassName(EandRtr.get(1).getClass().toString());
-        }
+//        Transformation transformationClass = getValueTransformation();
+//        System.out.println("transformationClass " + transformationClass.getClass().toString());
+//        String transformation = StringUtil.getClassName(transformationClass.getClass().toString());
 
         for (int i = 0; i < sourceTrace.getPointsOfTrace().size(); i++) {
 
             //add delete points here    
             Model sourcePointModel = sourceTrace.getPointsOfTrace().get(i);
-            if (relation.contains("VALUE") && i > 0) { //0 index contains rdf:type trace
-                call.AddDeletePointsCases();
-                Transformation addDelete = call.getAdditionDeletionPointConfiguration();
+            if (i > 0) { //0 index contains rdf:type trace
+                getRelationsCall().AddDeletePointsCases();
+                Transformation addDelete = getRelationsCall().getAdditionDeletionPointConfiguration();
                 if (addDelete != null) {
+//                    System.out.println("addDelete " +addDelete.toString());
+                
                     if (StringUtil.getClassName(addDelete.getClass().toString()).equals("DeletePoint")) {
                         Iterator<Statement> it = sourcePointModel.iterator();
                         Statement statement = it.next();
@@ -167,9 +159,9 @@ public class CreateInstances {
                 if (!URIMap.containsKey(statement.getSubject())) {
                     targetURI = targetSubject(statement);
 
-                    WriteDetailedGS(statement.getSubject(), targetURI, relation, null);
-                    String r = relation.replace("VALUE", "EQUALS");
-                    WriteGS(statement.getSubject(), targetURI, r);
+                    WriteDetailedGS(statement.getSubject(), targetURI, "", null);
+//                    String r = transformation.replace("VALUE", "EQUALS");
+                    WriteGS(statement.getSubject(), targetURI, "");
 
                 } else if (URIMap.containsKey(statement.getSubject())) {
                     targetURI = URIMap.get(statement.getSubject());
@@ -181,10 +173,11 @@ public class CreateInstances {
                     //change bnode
                     Value targetObject = targetObject(statement);
                     if (targetObject == null) {
-                        if (relation.contains("VALUE")) {
+//                        if (transformation.contains("VALUE")) {
                             if (statement.getPredicate().getLocalName().equals("label")) { //maybe i can make this: object instanceof String
-                                call.valueBasedCases();
-                                Transformation transform = call.getEqualTransformationConfiguration();
+                                getRelationsCall().valueBasedCases();
+                                Transformation transform = getRelationsCall().getValueTransformationConfiguration();
+//                                System.out.println("transform 1 " +transform);
                                 if (transform != null) { //transformation case
                                     String targetObjectStr = transform.execute(statement.getObject().stringValue()).toString();
                                     Value targetObjectLiteral = ValueFactoryImpl.getInstance().createLiteral(targetObjectStr, XMLSchema.STRING);
@@ -198,8 +191,9 @@ public class CreateInstances {
                                 statement = it.next();
                                 statement = it.next();
                             } else if (statement.getPredicate().getLocalName().equals("hasTimestamp")) {
-                                call.TimestampCases();
-                                Transformation transform = call.getEqualTransformationConfiguration();
+                                getRelationsCall().TimestampCases();
+                                Transformation transform = getRelationsCall().getValueTransformationConfiguration();
+//                                 System.out.println("transform 2 " +transform);
                                 if (transform != null) { //transformation case
                                     String targetObjectStr = transform.execute(statement.getObject().stringValue()).toString();
                                     Value targetObjectLiteral = ValueFactoryImpl.getInstance().createLiteral(targetObjectStr);
@@ -211,8 +205,9 @@ public class CreateInstances {
                                     targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
                                 }
                             } else if (statement.getPredicate().getLocalName().equals("lat")) {
-                                call.CoordinateCases();
-                                Transformation transform = call.getEqualTransformationConfiguration();
+                                getRelationsCall().CoordinateCases();
+                                Transformation transform = getRelationsCall().getValueTransformationConfiguration();
+//                                 System.out.println("transform 3 " +transform);
                                 if (transform != null) { //transformation case
                                     Statement st1 = statement;
                                     Statement st2 = it.next();
@@ -234,14 +229,14 @@ public class CreateInstances {
                                     targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
                                 }
 
-                            } else {
-                                targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
-                            }
-                        } else if (statement.getPredicate().getLocalName().equals("label")) { //maybe i can make this: object instanceof String
-                            targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
-                            //skip long lat if there is a label, we keep all info in order to be able to add new points
-                            statement = it.next();
-                            statement = it.next();
+//                            }else {
+//                                targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
+//                            }
+//                        } else if (statement.getPredicate().getLocalName().equals("label")) { //maybe i can make this: object instanceof String
+//                            targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
+//                            //skip long lat if there is a label, we keep all info in order to be able to add new points
+//                            statement = it.next();
+//                            statement = it.next();
 
                         } else {
                             targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());

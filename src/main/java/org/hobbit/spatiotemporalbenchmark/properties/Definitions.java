@@ -15,9 +15,6 @@ import org.hobbit.spatiotemporalbenchmark.util.AllocationsUtil;
  */
 public class Definitions {
 
-    public static final String SPATIAL_RELATIONS_ALLOCATION = "spatialRelationsAllocation";
-    public static final String TEMPORAL_RELATIONS_ALLOCATION = "temporalRelationsAllocation";
-    public static final String EQUAL_AND_RELATIONS_ALLOCATION = "equalAndRelationAllocation";
     public static final String VALUE_BASED_ALLOCATION = "valueBasedAllocation";
     public static final String TIMESTAMP_ALLOCATION = "timestampAllocation";
     public static final String COORDINATES_ALLOCATION = "coordinatesAllocation";
@@ -25,14 +22,7 @@ public class Definitions {
     public static final String VALUE_SOURCE_ALLOCATION = "valueSourceAllocation";
     public static final String KEEP_POINTS_ALLOCATION = "keepPointsAllocation";
 
-    //Determines spatial allocation amount of relations 
-    public static AllocationsUtil spatialRelationsAllocation;
-    
-    //Determines temporal allocation amount of relations 
-    public static AllocationsUtil temporalRelationsAllocation;
-
-    //Determines allocation amount of relations and equality 
-    public static AllocationsUtil equalAndRelationAllocation;
+   
 
     //Determines allocation of value based transformations  
     public static AllocationsUtil valueBasedAllocation;
@@ -143,10 +133,6 @@ public class Definitions {
         if (verbose) {
             System.out.println("Initializing allocations...");
         }
-
-        initializeAllocation(SPATIAL_RELATIONS_ALLOCATION, random);
-        initializeAllocation(TEMPORAL_RELATIONS_ALLOCATION, random);
-        initializeAllocation(EQUAL_AND_RELATIONS_ALLOCATION, random);
         initializeAllocation(VALUE_BASED_ALLOCATION, random);
         initializeAllocation(TIMESTAMP_ALLOCATION, random);
         initializeAllocation(COORDINATES_ALLOCATION, random);
@@ -156,9 +142,7 @@ public class Definitions {
     }
 
     public static void reconfigureAllocations(Random random) {
-        spatialRelationsAllocation.setRandom(random);
-        temporalRelationsAllocation.setRandom(random);
-        equalAndRelationAllocation.setRandom(random);
+
         valueBasedAllocation.setRandom(random);
         timestampAllocation.setRandom(random);
         coordinatesAllocation.setRandom(random);
@@ -180,13 +164,7 @@ public class Definitions {
             allocationsAsDoubles[i] = Double.parseDouble(allocationsAsStrings[i]);
         }
 
-        if (allocationPropertyName.equals(SPATIAL_RELATIONS_ALLOCATION)) {
-            spatialRelationsAllocation = new AllocationsUtil(allocationsAsDoubles, random);
-        }else if (allocationPropertyName.equals(TEMPORAL_RELATIONS_ALLOCATION)) {
-            temporalRelationsAllocation = new AllocationsUtil(allocationsAsDoubles, random);
-        }else if (allocationPropertyName.equals(EQUAL_AND_RELATIONS_ALLOCATION)) {
-            equalAndRelationAllocation = new AllocationsUtil(allocationsAsDoubles, random);
-        } else if (allocationPropertyName.equals(VALUE_BASED_ALLOCATION)) {
+        if (allocationPropertyName.equals(VALUE_BASED_ALLOCATION)) {
             valueBasedAllocation = new AllocationsUtil(allocationsAsDoubles, random);
         } else if (allocationPropertyName.equals(TIMESTAMP_ALLOCATION)) {
             timestampAllocation = new AllocationsUtil(allocationsAsDoubles, random);
