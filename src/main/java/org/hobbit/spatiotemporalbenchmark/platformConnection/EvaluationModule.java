@@ -123,7 +123,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
                 
                 //check this 
                 //source pred targ
-                String target_temp = answer.split(">")[2];
+                String target_temp = answer.split(">")[1];
                 String target = target_temp.substring(target_temp.indexOf("<")+1);
                 LOGGER.info("EvaluationModule source from gs " +source);
                 LOGGER.info("EvaluationModule target from gs " +target);

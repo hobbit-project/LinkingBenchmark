@@ -261,6 +261,8 @@ public class DataGenerator extends AbstractDataGenerator {
         //mipos pragmatika den krataei to keep points gia fen exo kanei set opos pararakato ?
         //des to kai sto spatial! 
         
+        //tupose ta allocations mesa sto transcall na deis 
+        
 //        ArrayList<Double> relationArrayList = new ArrayList<Double>();
 //        for (int i = 0; i < 10; i++) {
 //            relationArrayList.add(0.0);
