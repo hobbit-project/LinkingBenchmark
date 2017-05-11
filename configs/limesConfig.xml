@@ -25,7 +25,8 @@
      <PROPERTY>tomtom:hasPoint/tomtom:hasTimestamp RENAME timeStamp</PROPERTY> 
      <PROPERTY>tomtom:hasPoint/tomtom:lat RENAME lat</PROPERTY>
      <PROPERTY>tomtom:hasPoint/tomtom:long RENAME lon</PROPERTY>
-     <PROPERTY>tomtom:hasPoint/tomtom:hasSpeed/tomtom:velocityValue RENAME velocityValue</PROPERTY>
+     <PROPERTY>tomtom:hasPoint/tomtom:label RENAME label</PROPERTY>
+     <!-- <PROPERTY>tomtom:hasPoint/tomtom:hasSpeed/tomtom:velocityValue RENAME velocityValue</PROPERTY> -->
 		<!--<TYPE>NT</TYPE> -->
     </SOURCE>
     <TARGET>
@@ -39,10 +40,11 @@
      <PROPERTY>tomtom:hasPoint/tomtom:hasTimestamp RENAME timeStamp</PROPERTY> 
      <PROPERTY>tomtom:hasPoint/tomtom:lat RENAME lat</PROPERTY>
      <PROPERTY>tomtom:hasPoint/tomtom:long RENAME lon</PROPERTY>
-     <PROPERTY>tomtom:hasPoint/tomtom:hasSpeed/tomtom:velocityValue RENAME velocityValue</PROPERTY>
+      <PROPERTY>tomtom:hasPoint/tomtom:label RENAME label</PROPERTY>
+     <!-- <PROPERTY>tomtom:hasPoint/tomtom:hasSpeed/tomtom:velocityValue RENAME velocityValue</PROPERTY> -->
 		<!--<TYPE>NT</TYPE> -->
     </TARGET>
-	<METRIC>AND(AND(AND(trigram(x.timeStamp, y.timeStamp)|1.0,top_equals(x.lat,y.lat)|1.0),top_equals(x.lon,y.lon)|1.0),euclidean(x.velocityValue, y.velocityValue)|1.0)</METRIC>
+	<METRIC>AND(AND(AND(trigram(x.timeStamp, y.timeStamp)|1.0,top_equals(x.lat,y.lat)|1.0),top_equals(x.lon,y.lon)|1.0),euclidean(x.label, y.label)|1.0)</METRIC>
      <ACCEPTANCE>
         <THRESHOLD>1.0</THRESHOLD>
        <FILE>./datasets/GoldStandards/mapping.nt</FILE>
