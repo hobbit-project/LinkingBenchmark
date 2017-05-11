@@ -2,7 +2,7 @@
 
 FROM java
 
-ADD target/LinkingBenchmark-1.0-SNAPSHOT.jar /SpatialLinkingBenchmark/LinkingBenchmark.jar
+ADD target/LinkingBenchmark-1.0-SNAPSHOT.jar /LinkingBenchmark/LinkingBenchmark.jar
 
 WORKDIR /LinkingBenchmark
 
