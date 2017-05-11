@@ -30,6 +30,7 @@ public class TaskGenerator extends AbstractTaskGenerator {
 
     @Override
     protected void generateTask(byte[] data) throws Exception {
+        LOGGER.info("generateTask");
         try {
             // Create tasks based on the incoming data inside this method.
             // You might want to use the id of this task generator and the
@@ -46,15 +47,16 @@ public class TaskGenerator extends AbstractTaskGenerator {
             String format = RabbitMQUtils.readString(taskBuffer);
             String path = RabbitMQUtils.readString(taskBuffer);
             byte[] targetData = RabbitMQUtils.readByteArray(taskBuffer);
+LOGGER.info("read data [] - task generator");
 
             byte[][] taskDataArray = new byte[3][];
             taskDataArray[0] = RabbitMQUtils.writeString(format);
             taskDataArray[1] = RabbitMQUtils.writeString(path);
             taskDataArray[2] = targetData;
             byte[] taskData = RabbitMQUtils.writeByteArrays(taskDataArray);
-
+LOGGER.info("done with taskData - task generator");
             byte[] expectedAnswerData = task.getExpectedAnswers();
-
+LOGGER.info("done with expectedAnswerData - task generator");
             // Send the task to the system (and store the timestamp)
             long timestamp = System.currentTimeMillis();
             sendTaskToSystemAdapter(taskId, taskData);

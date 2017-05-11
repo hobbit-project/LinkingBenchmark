@@ -82,13 +82,11 @@ public class Generator {
 
     public void exec() {
         try {
-            System.out.println("eimai sto exec tou generator");
             call.valueBasedCases(); //check
             transform = (DataValueTransformation) call.getValueTransformationConfiguration(); //check
             System.out.println("exec configurations instances " + getConfigurations().getString(Configurations.INSTANCES));
 
             Worker worker = new Worker();
-            System.out.println("the kano exec ton worker");
             worker.execute();
 
         } catch (Exception ex) {

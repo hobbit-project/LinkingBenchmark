@@ -121,8 +121,12 @@ public class EvaluationModule extends AbstractEvaluationModule {
                 String source_temp = answer.split(">")[0];
                 String source = source_temp.substring(source_temp.indexOf("<")+1);
                 
-                String target_temp = answer.split(">")[1];
+                //check this 
+                //source pred targ
+                String target_temp = answer.split(">")[2];
                 String target = target_temp.substring(target_temp.indexOf("<")+1);
+                LOGGER.info("EvaluationModule source from gs " +source);
+                LOGGER.info("EvaluationModule target from gs " +target);
                 expectedMap.put(source , target);
             }
 //            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));

@@ -8,6 +8,8 @@ COPY datasets/* /LinkingBenchmark/datasets/
 
 COPY configs/* /LinkingBenchmark/configs/
 
+COPY lib/* /LinkingBenchmark/lib/
+
 COPY datasets/SourceDatasets/ /LinkingBenchmark/datasets/SourceDatasets/
 
 COPY datasets/TargetDatasets/ /LinkingBenchmark/datasets/TargetDatasets/

@@ -33,10 +33,10 @@ public class DataGenerator extends AbstractDataGenerator {
     private int numberOfDataGenerators; //TODO: use this
     private int population;
     public static String serializationFormat;
-    private double keepPoints;
-    private double severity;
-    private double changeTimestamp;
-    private double sourcePointsToLabels;
+    private float keepPoints;
+    private float severity;
+    private float changeTimestamp;
+    private float sourcePointsToLabels;
     private String addRemovePoints;
     private String targetPointsTransformations;
     private String valueBasedTransformations;
@@ -101,6 +101,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
+        LOGGER.info("source data " +new String(generatedFileArray[2]));
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 // send data to system
@@ -116,6 +117,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 LOGGER.info("file.getAbsolutePath() gs " + file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
+        LOGGER.info("source data " +new String(generatedFileArray[2]));
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
 
@@ -130,6 +132,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
+        LOGGER.info("target data " +new String(generatedFileArray[2]));
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 task.setTarget(generatedFile);
@@ -154,18 +157,18 @@ public class DataGenerator extends AbstractDataGenerator {
         serializationFormat = (String) getFromEnv(env, PlatformConstants.GENERATED_DATA_FORMAT, "");
         population = (Integer) getFromEnv(env, PlatformConstants.GENERATED_POPULATION, 0);
         numberOfDataGenerators = (Integer) getFromEnv(env, PlatformConstants.NUMBER_OF_DATA_GENERATORS, 0);
-        keepPoints = (double) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0);
+        keepPoints = (float) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0f);
 
-        severity = (double) getFromEnv(env, PlatformConstants.SEVERITY, 0.0);
-        changeTimestamp = (double) getFromEnv(env, PlatformConstants.CHANGE_TIMESTAMP, 0.0);
-        sourcePointsToLabels = (double) getFromEnv(env, PlatformConstants.SOURCE_POINTS_TO_LABELS, 0.0);
+        severity = (float) getFromEnv(env, PlatformConstants.SEVERITY, 0.0f);
+        changeTimestamp = (float) getFromEnv(env, PlatformConstants.CHANGE_TIMESTAMP, 0.0f);
+        sourcePointsToLabels = (float) getFromEnv(env, PlatformConstants.SOURCE_POINTS_TO_LABELS, 0.0f);
         addRemovePoints = (String) getFromEnv(env, PlatformConstants.ADD_REMOVE_POINTS, "");
         targetPointsTransformations = (String) getFromEnv(env, PlatformConstants.TARGET_POINTS_TRANSFORMATIONS, "");
         valueBasedTransformations = (String) getFromEnv(env, PlatformConstants.VALUE_BASED_TRANSFORMATIONS, "");
         
         //to keep points to diavazei kala alla oxi ta upoloipa floats! giati?
         LOGGER.info("keepPoints " + keepPoints);
-        LOGGER.info("severity " + severity); //severity 0.20000000298023224 ??
+        LOGGER.info("severity " + severity); 
         LOGGER.info("changeTimestamp " + changeTimestamp);
         LOGGER.info("sourcePointsToLabels " + sourcePointsToLabels);
         LOGGER.info("addRemovePoints " + addRemovePoints);
@@ -201,6 +204,8 @@ public class DataGenerator extends AbstractDataGenerator {
                 return (T) (Long) Long.parseLong(env.get(parameter));
             } else if (paramType instanceof Double) {
                 return (T) (Double) Double.parseDouble(env.get(parameter));
+            }else if (paramType instanceof Float) {
+                return (T) (Float) Float.parseFloat(env.get(parameter));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(
@@ -226,21 +231,21 @@ public class DataGenerator extends AbstractDataGenerator {
         
 //TODO : check if keep points < 1.0
         ArrayList<Double> points = new ArrayList<Double>();
-        points.add(keepPoints);
-        points.add(1.0 - keepPoints);
+        points.add(Double.parseDouble(Float.toString(keepPoints)));
+        points.add(1.0 - Double.parseDouble(Float.toString(keepPoints)));
         Random random = new Random();
         Definitions.keepPointsAllocation = new AllocationsUtil(points, random);
 
         //timestamp
         ArrayList<Double> timestamp = new ArrayList<Double>();
-        timestamp.add(changeTimestamp);
+        timestamp.add(Double.parseDouble(Float.toString(changeTimestamp)));
         timestamp.add(1.0 - changeTimestamp);
         Definitions.timestampAllocation = new AllocationsUtil(timestamp, random);
 
         //source points to labels
         ArrayList<Double> sourceLabels = new ArrayList<Double>();
-        sourceLabels.add(sourcePointsToLabels);
-        sourceLabels.add(1.0 - sourcePointsToLabels);
+        sourceLabels.add(Double.parseDouble(Float.toString(sourcePointsToLabels)));
+        sourceLabels.add(1.0 - Double.parseDouble(Float.toString(sourcePointsToLabels)));
         Definitions.valueSourceAllocation = new AllocationsUtil(sourceLabels, random);
         
         //add/remove points

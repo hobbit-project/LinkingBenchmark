@@ -5,17 +5,13 @@
  */
 package org.hobbit.spatiotemporalbenchmark.platformConnection.systems;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
-import static org.aksw.limes.core.controller.Controller.getConfig;
-import static org.aksw.limes.core.controller.Controller.getMapping;
-import static org.aksw.limes.core.controller.Controller.parseCommandLine;
-import org.aksw.limes.core.controller.ResultMappings;
-import org.aksw.limes.core.io.config.Configuration;
-import org.aksw.limes.core.io.serializer.ISerializer;
-import org.aksw.limes.core.io.serializer.SerializerFactory;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.hobbit.core.components.AbstractSystemAdapter;
@@ -29,20 +25,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author jsaveta
  */
-public class LinkingSystemAdapter extends AbstractSystemAdapter {
+public class LogMapSystemAdapter extends AbstractSystemAdapter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LinkingSystemAdapter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogMapSystemAdapter.class);
     private String receivedGeneratedDataFilePath;
     private String dataFormat;
     private String taskFormat;
-    private String resultsFile;
-    private ResultMappings mappings;
+    private File resultsFile;
 
     @Override
     public void init() throws Exception {
-        LOGGER.info("Initializing Limes test system...");
+        LOGGER.info("Initializing LogMap test system...");
         super.init();
-        LOGGER.info("Limes initialized successfully .");
+        LOGGER.info("LogMap initialized successfully .");
 
     }
 
@@ -58,7 +53,7 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
         try {
             FileUtils.writeByteArrayToFile(new File(receivedGeneratedDataFilePath), receivedGeneratedData);
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(LinkingSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LogMapSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         LOGGER.info("Received data from receiveGeneratedData..");
@@ -85,9 +80,10 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
 
             LOGGER.info("Received task from receiveGeneratedTask..");
 
+            
             linkingController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath);
             byte[][] resultsArray = new byte[1][];
-            resultsArray[0] = FileUtils.readFileToByteArray(new File(resultsFile));
+            resultsArray[0] = FileUtils.readFileToByteArray(resultsFile);
             byte[] results = RabbitMQUtils.writeByteArrays(resultsArray);
             try {
 
@@ -97,50 +93,39 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
                 LOGGER.error("Exception while sending storage space cost to evaluation storage.", e);
             }
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(LinkingSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LogMapSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     public void linkingController(String source, String target) throws IOException {
+        resultsFile = new File("./datasets/LimesSystemAdapterResults/mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
 
-        LOGGER.info("Started limesController.. ");
+        LOGGER.info("Started LogMap Controller.. ");
+        Runtime rt = Runtime.getRuntime();
+        Process pr = rt.exec("java -jar ./lib/logmap2_standalone.jar "
+                + "MATCHER file:" + source + " "
+                + "file:" + target + " "
+                + ""+resultsFile.getAbsolutePath()+" true");
+        
+        //-Xms512m -Xmx1152m
+        //an treksei allakse kai to memory tis java stin entoli
 
-        String[] args = new String[1];
-        args[0] = "./configs/limesConfig.xml";
+        File[] files = new File("file.getName()").listFiles();
+//If this pathname does not denote a directory, then listFiles() returns null. 
 
-        CommandLine cmd = parseCommandLine(args);
-        Configuration config = getConfig(cmd);
-        config.getSourceInfo().setEndpoint(source);
-        config.getTargetInfo().setEndpoint(target);
-        config.getSourceInfo().setType(dataFormat);
-        config.getTargetInfo().setType(taskFormat);
-
-        resultsFile = "./datasets/LimesSystemAdapterResults/mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
-
-        File dir = new File("./datasets/LimesSystemAdapterResults");
-        dir.mkdirs();
-        File file = new File(dir, "mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
-
-        config.setAcceptanceFile(resultsFile);
-        config.setVerificationFile("./datasets/LimesSystemAdapterResults/absolute_mapping_almost." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
-
-        mappings = getMapping(config);
-        writeResults(mappings, config);
-
-        //delete cache folder 
-        File folder = new File("./cache/");
-        FileUtil.removeDirectory(folder);
-
-        LOGGER.info("limesController finished..");
+        for (File file : files) {
+            if (file.isFile()) {
+                LOGGER.info("Logmap - Results file.getName() " + file.getName());
+                
+                BufferedReader br = new BufferedReader(new FileReader("./datasets/LogMapSystemAdapterResults/"+file.getName()));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    LOGGER.info("-> "+line);
+                }
+            }
+        }
+        LOGGER.info("LogMap Controller finished..");
     }
-
-    private static void writeResults(ResultMappings mappings, Configuration config) {
-        String outputFormat = config.getOutputFormat();
-        ISerializer output = SerializerFactory.createSerializer(outputFormat);
-        output.setPrefixes(config.getPrefixes());
-        output.writeToFile(mappings.getAcceptanceMapping(), config.getAcceptanceRelation(), config.getAcceptanceFile());
-    }
-    
 
     @Override
     public void close() throws IOException {
@@ -151,3 +136,5 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
     }
 }
 
+//https://sourceforge.net/projects/logmap-matcher/files/Standalone%20distribution/
+//java -jar logmap2_standalone.jar MATCHER file:/home/ontos/cmt.owl file:/home/ontos/ekaw.owl /home/mappings/output true
