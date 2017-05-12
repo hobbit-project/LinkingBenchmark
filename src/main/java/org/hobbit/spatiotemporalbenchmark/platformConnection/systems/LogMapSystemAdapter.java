@@ -38,6 +38,8 @@ public class LogMapSystemAdapter extends AbstractSystemAdapter {
         LOGGER.info("Initializing LogMap test system...");
         super.init();
         LOGGER.info("LogMap initialized successfully .");
+        
+        //LOGMAP NEEDS THE ONTOLOGY. DO WE NEED TO WRITE THE ONTOLOGY AT THE BEGINING OS THE SOURCE AND TARGT DATASET!?
 
     }
 
@@ -138,3 +140,45 @@ public class LogMapSystemAdapter extends AbstractSystemAdapter {
 
 //https://sourceforge.net/projects/logmap-matcher/files/Standalone%20distribution/
 //java -jar logmap2_standalone.jar MATCHER file:/home/ontos/cmt.owl file:/home/ontos/ekaw.owl /home/mappings/output true
+
+
+
+/*
+
+@prefix : <http://www.tomtom.com/ontologies/traces#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.tomtom.com/ontologies/traces> .
+
+<http://www.tomtom.com/ontologies/traces> rdf:type owl:Ontology ;
+owl:imports <http://sweet.jpl.nasa.gov/2.0/physDynamics.owl> ,
+<https://www.w3.org/2003/01/geo/wgs84_pos#> .
+
+:Trace rdf:type owl:Class .
+
+:Point rdf:type owl:Class ;
+    rdfs:subClassOf <http://www.w3.org/2003/01/geo/wgs84_pos#Point> .
+
+:hasTimestamp rdf:type owl:AnnotationProperty ;
+    rdfs:range xsd:dateTimeStamp ;
+    rdfs:domain :Point .
+	
+:hasPoint rdf:type owl:ObjectProperty ;
+    rdfs:range :Point ;
+    rdfs:domain :Trace .
+
+:hasSpeed rdf:type owl:ObjectProperty ;
+    rdfs:range <http://sweet.jpl.nasa.gov/2.0/physDynamics.owl#Velocity> ;
+    rdfs:domain :Point .
+
+:velocityValue rdf:type owl:DataTypeProperty;
+    rdfs:range xsd:Float ;
+    rdfs:domain :Velocity . 
+
+:velocityMetric rdf:type owl:ObjectProperty;
+    owl:oneOf (:killimeters_perHour :miles_perHour) .
+
+
+*/

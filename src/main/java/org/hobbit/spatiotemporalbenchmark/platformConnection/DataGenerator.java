@@ -101,7 +101,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-//        LOGGER.info("source data " +new String(generatedFileArray[2]));
+                
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 // send data to system
@@ -115,14 +115,12 @@ public class DataGenerator extends AbstractDataGenerator {
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
-                LOGGER.info("file.getAbsolutePath() gs " + file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-        LOGGER.info("gs data " +new String(generatedFileArray[2]));
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
 
                 task.setExpectedAnswers(generatedFile);
-        LOGGER.info("Gold Standard successfully added to Task.");
+                LOGGER.info("ExpectedAnswers successfully added to Task.");
             }
 
             // send generated tasks along with their expected answers to task generator
@@ -132,7 +130,6 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-//        LOGGER.info("target data " +new String(generatedFileArray[2]));
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 task.setTarget(generatedFile);
@@ -166,16 +163,13 @@ public class DataGenerator extends AbstractDataGenerator {
         targetPointsTransformations = (String) getFromEnv(env, PlatformConstants.TARGET_POINTS_TRANSFORMATIONS, "");
         valueBasedTransformations = (String) getFromEnv(env, PlatformConstants.VALUE_BASED_TRANSFORMATIONS, "");
         
-        //to keep points to diavazei kala alla oxi ta upoloipa floats! giati?
-        LOGGER.info("keepPoints " + keepPoints);
-        LOGGER.info("severity " + severity); 
-        LOGGER.info("changeTimestamp " + changeTimestamp);
-        LOGGER.info("sourcePointsToLabels " + sourcePointsToLabels);
-        LOGGER.info("addRemovePoints " + addRemovePoints);
-        LOGGER.info("targetPointsTransformations " + targetPointsTransformations);
-        LOGGER.info("valueBasedTransformations " + valueBasedTransformations);
-        
-        //des kai sto transformations call pos ektuponontai
+//        LOGGER.info("keepPoints " + keepPoints);
+//        LOGGER.info("severity " + severity); 
+//        LOGGER.info("changeTimestamp " + changeTimestamp);
+//        LOGGER.info("sourcePointsToLabels " + sourcePointsToLabels);
+//        LOGGER.info("addRemovePoints " + addRemovePoints);
+//        LOGGER.info("targetPointsTransformations " + targetPointsTransformations);
+//        LOGGER.info("valueBasedTransformations " + valueBasedTransformations);
         
     }
 
@@ -257,22 +251,6 @@ public class DataGenerator extends AbstractDataGenerator {
         //value-based transformations
         Definitions.valueBasedAllocation = new AllocationsUtil(stringToArray(valueBasedTransformations), random);
 
-        //print an ta pairnei sosta
-        //mipos pragmatika den krataei to keep points gia fen exo kanei set opos pararakato ?
-        //des to kai sto spatial! 
-        
-        //tupose ta allocations mesa sto transcall na deis 
-        
-//        ArrayList<Double> relationArrayList = new ArrayList<Double>();
-//        for (int i = 0; i < 10; i++) {
-//            relationArrayList.add(0.0);
-//        }
-//        int index = spatialRelation.valueOf(relation).ordinal();
-//        relationArrayList.add(index, 1.0);
-//        Definitions.spatialRelationsAllocation = new AllocationsUtil(relationArrayList, random);
-//
-//        getRelationsCall().spatialRelationsCases();
-//        setSpatialTransformation(getRelationsCall().getSpatialRelationsConfiguration());
     }
 
     public static void loadPropertiesConfigurationFiles() throws IOException {

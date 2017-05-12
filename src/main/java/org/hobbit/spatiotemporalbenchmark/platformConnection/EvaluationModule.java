@@ -116,10 +116,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
 
         LOGGER.info("expected " + new String(expected));
 
-        LOGGER.info("dataAnswers " + Arrays.toString(dataAnswers));
-
         HashMap<String, String> expectedMap = new HashMap<String, String>();
-//        if (dataAnswers.length > 0) {
             for (String answer : dataAnswers) {
                 answer = answer.trim();
                 if (answer != null && !answer.equals("")) {                    
@@ -139,11 +136,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
                     LOGGER.info("EvaluationModule target from gs " + target);
                     expectedMap.put(source, target);
                 }
-//            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
-//            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
                 LOGGER.info("expected data into the map: " + expectedMap.toString());
             }
-//        }
+
         // read received data
         LOGGER.info("Read received data");
         //handle empty results! 
@@ -153,15 +148,12 @@ public class EvaluationModule extends AbstractEvaluationModule {
         }
 
         LOGGER.info("receivedData----" + new String(receivedData) + "----");
-        LOGGER.info("receivedDataAnswers " + Arrays.toString(receivedDataAnswers));
-        LOGGER.info("receivedDataAnswers.length" + receivedDataAnswers.length);
 
         HashMap<String, String> receivedMap = new HashMap<String, String>();
-//        if (receivedDataAnswers.length > 0) {
             for (String answer : receivedDataAnswers) {
                 answer = answer.trim();
                 if (answer != null && !answer.equals("")) {
-                    LOGGER.info("answer**" + answer + "**");
+
                     String source_temp = answer.split(">")[0];
                     String source = source_temp.substring(source_temp.indexOf("<") + 1);
 
@@ -169,12 +161,10 @@ public class EvaluationModule extends AbstractEvaluationModule {
                     String target = target_temp.substring(target_temp.indexOf("<") + 1);
                     receivedMap.put(source, target);
                 }
-//            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
-//            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
                 LOGGER.info("received data into the map: " + receivedMap.toString());
             }
-//        }
-        LOGGER.info("after  receivedData map ");
+
+
         //TODO: check this again
         if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {
             for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
