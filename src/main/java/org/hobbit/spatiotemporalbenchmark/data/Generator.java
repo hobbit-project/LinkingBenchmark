@@ -44,7 +44,7 @@ public class Generator {
         return filesCount;
     }
 
-    public static TransformationsCall getRelationsCall() {
+    public static TransformationsCall getTransformationsCall() {
         return call;
     }
 
@@ -60,7 +60,7 @@ public class Generator {
         return transform;
     }
 
-    public static void setRelationsCall(TransformationsCall c) {
+    public static void setTransformationsCall(TransformationsCall c) {
         call = c;
     }
 

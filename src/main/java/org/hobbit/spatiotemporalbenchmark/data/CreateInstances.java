@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Map;
 import org.hobbit.spatiotemporalbenchmark.Trace;
 import org.hobbit.spatiotemporalbenchmark.transformations.Transformation;
+import org.hobbit.spatiotemporalbenchmark.transformations.TransformationsCall;
 import org.hobbit.spatiotemporalbenchmark.transformations.value.CoordinatesToAddress;
 import org.hobbit.spatiotemporalbenchmark.transformations.value.AddPoint;
 import org.hobbit.spatiotemporalbenchmark.util.RandomUtil;
@@ -54,8 +55,8 @@ public class CreateInstances extends Generator {
         while (it.hasNext()) {
             Statement statement = it.next();
             if (statement.getPredicate().getLocalName().equals("lat")) {
-                getRelationsCall().valueSourceCases();
-                Transformation transform = getRelationsCall().getSourceTransformationConfigurations();
+                getTransformationsCall().valueSourceCases();
+                Transformation transform = getTransformationsCall().getSourceTransformationConfigurations();
                 if (transform != null) {
                     double latitude = Double.parseDouble(statement.getObject().stringValue());
                     Statement statementLAT = statement;
@@ -84,12 +85,12 @@ public class CreateInstances extends Generator {
                 }
             } else {
                 if (statement.getPredicate().getLocalName().equals("hasPoint") || !it.hasNext()) {
-                    getRelationsCall().keepPointCases();
+                    getTransformationsCall().keepPointCases();
                     if (!it.hasNext()) {
                         point.add(statement);
                         extendedPoint.add(statement);
                     }
-                    if (getRelationsCall().getKeepPoint()) { //check alloccation of config file for the percentage of points to keep
+                    if (getTransformationsCall().getKeepPoint()) { //check alloccation of config file for the percentage of points to keep
                         trace.addPointsOfTrace(point);
                         extendedTrace.addPointsOfTrace(extendedPoint);
                     }
@@ -120,8 +121,8 @@ public class CreateInstances extends Generator {
             //add delete points here    
             Model sourcePointModel = sourceTrace.getPointsOfTrace().get(i);
             if (i > 0) { //0 index contains rdf:type trace
-                getRelationsCall().AddDeletePointsCases();
-                Transformation addDelete = getRelationsCall().getAdditionDeletionPointConfiguration();
+                getTransformationsCall().AddDeletePointsCases();
+                Transformation addDelete = getTransformationsCall().getAdditionDeletionPointConfiguration();
                 if (addDelete != null) {
 //                    System.out.println("addDelete " +addDelete.toString());
                 
@@ -161,7 +162,7 @@ public class CreateInstances extends Generator {
 
                     WriteDetailedGS(statement.getSubject(), targetURI, "", null);
 //                    String r = transformation.replace("VALUE", "EQUALS");
-                    WriteGS(statement.getSubject(), targetURI, "");
+                    WriteGS(statement.getSubject(), targetURI);
 
                 } else if (URIMap.containsKey(statement.getSubject())) {
                     targetURI = URIMap.get(statement.getSubject());
@@ -175,8 +176,8 @@ public class CreateInstances extends Generator {
                     if (targetObject == null) {
 //                        if (transformation.contains("VALUE")) {
                             if (statement.getPredicate().getLocalName().equals("label")) { //maybe i can make this: object instanceof String
-                                getRelationsCall().valueBasedCases();
-                                Transformation transform = getRelationsCall().getValueTransformationConfiguration();
+                                getTransformationsCall().valueBasedCases();
+                                Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
 //                                System.out.println("transform 1 " +transform);
                                 if (transform != null) { //transformation case
                                     String targetObjectStr = transform.execute(statement.getObject().stringValue()).toString();
@@ -191,8 +192,8 @@ public class CreateInstances extends Generator {
                                 statement = it.next();
                                 statement = it.next();
                             } else if (statement.getPredicate().getLocalName().equals("hasTimestamp")) {
-                                getRelationsCall().TimestampCases();
-                                Transformation transform = getRelationsCall().getValueTransformationConfiguration();
+                                getTransformationsCall().TimestampCases();
+                                Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
 //                                 System.out.println("transform 2 " +transform);
                                 if (transform != null) { //transformation case
                                     String targetObjectStr = transform.execute(statement.getObject().stringValue()).toString();
@@ -205,8 +206,8 @@ public class CreateInstances extends Generator {
                                     targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
                                 }
                             } else if (statement.getPredicate().getLocalName().equals("lat")) {
-                                getRelationsCall().CoordinateCases();
-                                Transformation transform = getRelationsCall().getValueTransformationConfiguration();
+                                getTransformationsCall().CoordinateCases();
+                                Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
 //                                 System.out.println("transform 3 " +transform);
                                 if (transform != null) { //transformation case
                                     Statement st1 = statement;
@@ -320,9 +321,9 @@ public class CreateInstances extends Generator {
         this.detailedGSModel.add(subject, type, transformation_);
     }
 
-    public void WriteGS(Resource sourceInstance, Resource targetInstance, String r) {
-        String relation = "http://www.relation#" + r;
-        URI predicate = ValueFactoryImpl.getInstance().createURI(relation);
+    public void WriteGS(Resource sourceInstance, Resource targetInstance) {
+        String pr = "http://www.w3.org/2002/07/owl#sameAs";
+        URI predicate = ValueFactoryImpl.getInstance().createURI(pr);
         this.GSModel.add(sourceInstance, predicate, targetInstance); //value1 relation value2
     }
 

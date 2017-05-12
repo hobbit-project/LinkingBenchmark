@@ -107,35 +107,43 @@ public class EvaluationModule extends AbstractEvaluationModule {
         String path = RabbitMQUtils.readString(buffer);
 
         byte[] expected = RabbitMQUtils.readByteArray(buffer);
-        
+
         //handle empty results! 
         String[] dataAnswers = null;
         if (expected.length > 0) {
             dataAnswers = RabbitMQUtils.readString(expected).split(System.getProperty("line.separator"));
         }
 
+        LOGGER.info("expected " + new String(expected));
+
+        LOGGER.info("dataAnswers " + Arrays.toString(dataAnswers));
+
         HashMap<String, String> expectedMap = new HashMap<String, String>();
-        if (dataAnswers != null && dataAnswers.length > 0) {
+//        if (dataAnswers.length > 0) {
             for (String answer : dataAnswers) {
                 answer = answer.trim();
-                String source_temp = answer.split(">")[0];
-                String source = source_temp.substring(source_temp.indexOf("<")+1);
-                
-                //check this 
-                //source pred targ
-                String target_temp = answer.split(">")[1];
-                String target = target_temp.substring(target_temp.indexOf("<")+1);
-                LOGGER.info("EvaluationModule source from gs " +source);
-                LOGGER.info("EvaluationModule target from gs " +target);
-                expectedMap.put(source , target);
-            }
+                if (answer != null && !answer.equals("")) {                    
+                    LOGGER.info("answer " + answer);
+
+                    String source_temp = answer.split("<http://www.w3.org/2002/07/owl#sameAs>")[0];
+                    LOGGER.info("EvaluationModule source_temp from gs " + source_temp);
+                    String source = source_temp.substring(source_temp.indexOf("<") + 1);
+                    source = source.split(">")[0];
+                    LOGGER.info("EvaluationModule source from gs " + source);
+                    //check this 
+                    //source pred target
+                    String target_temp = answer.split("<http://www.w3.org/2002/07/owl#sameAs>")[1];
+                    LOGGER.info("EvaluationModule target_temp from gs " + target_temp);
+                    String target = target_temp.substring(target_temp.indexOf("<") + 1);
+                    target = target.split(">")[0];
+                    LOGGER.info("EvaluationModule target from gs " + target);
+                    expectedMap.put(source, target);
+                }
 //            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
 //            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
-            LOGGER.info("expected data into the map: " + expectedMap.toString());
-        }
-
-        
-
+                LOGGER.info("expected data into the map: " + expectedMap.toString());
+            }
+//        }
         // read received data
         LOGGER.info("Read received data");
         //handle empty results! 
@@ -143,48 +151,56 @@ public class EvaluationModule extends AbstractEvaluationModule {
         if (receivedData.length > 0) {
             receivedDataAnswers = RabbitMQUtils.readString(receivedData).split(System.getProperty("line.separator"));
         }
-        HashMap<String, String> receivedMap = new HashMap<String, String>();
 
-        if (receivedDataAnswers != null && receivedDataAnswers.length > 0) {
+        LOGGER.info("receivedData----" + new String(receivedData) + "----");
+        LOGGER.info("receivedDataAnswers " + Arrays.toString(receivedDataAnswers));
+        LOGGER.info("receivedDataAnswers.length" + receivedDataAnswers.length);
+
+        HashMap<String, String> receivedMap = new HashMap<String, String>();
+//        if (receivedDataAnswers.length > 0) {
             for (String answer : receivedDataAnswers) {
                 answer = answer.trim();
-                String source_temp = answer.split(">")[0];
-                String source = source_temp.substring(source_temp.indexOf("<")+1);
-                
-                String target_temp = answer.split(">")[1];
-                String target = target_temp.substring(target_temp.indexOf("<")+1);
-                receivedMap.put(source , target);
-            }
+                if (answer != null && !answer.equals("")) {
+                    LOGGER.info("answer**" + answer + "**");
+                    String source_temp = answer.split(">")[0];
+                    String source = source_temp.substring(source_temp.indexOf("<") + 1);
+
+                    String target_temp = answer.split(">")[1];
+                    String target = target_temp.substring(target_temp.indexOf("<") + 1);
+                    receivedMap.put(source, target);
+                }
 //            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
 //            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
-            LOGGER.info("received data into the map: " + receivedMap.toString());
-        }
-
+                LOGGER.info("received data into the map: " + receivedMap.toString());
+            }
+//        }
+        LOGGER.info("after  receivedData map ");
         //TODO: check this again
-        for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
-            String expectedKey = expectedEntry.getKey();
-            String expectedValue = expectedEntry.getValue();
+        if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {
+            for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
+                String expectedKey = expectedEntry.getKey();
+                String expectedValue = expectedEntry.getValue();
 
-            boolean tpFound = false;
-            for (Map.Entry<String, String> receivedEntry : receivedMap.entrySet()) {
-                tpFound = false;
-                String receivedKey = receivedEntry.getKey();
-                String receivedValue = receivedEntry.getValue();
+                boolean tpFound = false;
+                for (Map.Entry<String, String> receivedEntry : receivedMap.entrySet()) {
+                    tpFound = false;
+                    String receivedKey = receivedEntry.getKey();
+                    String receivedValue = receivedEntry.getValue();
 
-                if (expectedKey.equals(receivedKey) && expectedValue.equals(receivedValue)) {
-                    tpFound = true;
-                    break;
+                    if (expectedKey.equals(receivedKey) && expectedValue.equals(receivedValue)) {
+                        tpFound = true;
+                        break;
+                    }
+                }
+                if (tpFound == true) {
+                    truePositives++;
+                } else {
+                    falseNegatives++;
                 }
             }
-            if (tpFound == true) {
-                truePositives++;
-            } else {
-                falseNegatives++;
-            }
+            // what is not TP in the received answers, is a FP
+            falsePositives = receivedMap.size() - truePositives;
         }
-        // what is not TP in the received answers, is a FP
-        falsePositives = receivedMap.size() - truePositives;
-
         LOGGER.info("truePositives " + truePositives);
         LOGGER.info("falsePositives " + falsePositives);
         LOGGER.info("falseNegatives " + falseNegatives);
@@ -199,14 +215,19 @@ public class EvaluationModule extends AbstractEvaluationModule {
             Map<String, String> env = System.getenv();
             this.experimentUri = env.get(Constants.HOBBIT_EXPERIMENT_URI_KEY);
         }
+        double recall = 0.0;
+        double precision = 0.0;
+        double fmeasure = 0.0;
 
-        double recall = (double) this.truePositives
-                / (double) (this.truePositives + this.falseNegatives);
-        double precision = (double) this.truePositives
-                / (double) (this.truePositives + this.falsePositives);
-        double fmeasure = (double) (2.0 * recall * precision)
-                / (double) (recall + precision);
-
+        if ((double) (this.truePositives + this.falseNegatives) > 0.0) {
+            recall = (double) this.truePositives / (double) (this.truePositives + this.falseNegatives);
+        }
+        if ((double) (this.truePositives + this.falsePositives) > 0.0) {
+            precision = (double) this.truePositives / (double) (this.truePositives + this.falsePositives);
+        }
+        if ((double) (recall + precision) > 0.0) {
+            fmeasure = (double) (2.0 * recall * precision) / (double) (recall + precision);
+        }
         //////////////////////////////////////////////////////////////////////////////////////////////
         Resource experiment = this.finalModel.createResource(experimentUri);
         this.finalModel.add(experiment, RDF.type, HOBBIT.Experiment);

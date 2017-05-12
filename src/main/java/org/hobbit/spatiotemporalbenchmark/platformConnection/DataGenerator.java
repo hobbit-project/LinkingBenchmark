@@ -101,7 +101,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-        LOGGER.info("source data " +new String(generatedFileArray[2]));
+//        LOGGER.info("source data " +new String(generatedFileArray[2]));
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 // send data to system
@@ -117,12 +117,12 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 LOGGER.info("file.getAbsolutePath() gs " + file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-        LOGGER.info("source data " +new String(generatedFileArray[2]));
+        LOGGER.info("gs data " +new String(generatedFileArray[2]));
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
 
                 task.setExpectedAnswers(generatedFile);
-                LOGGER.info("Gold Standard successfully added to Task.");
+        LOGGER.info("Gold Standard successfully added to Task.");
             }
 
             // send generated tasks along with their expected answers to task generator
@@ -132,7 +132,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-        LOGGER.info("target data " +new String(generatedFileArray[2]));
+//        LOGGER.info("target data " +new String(generatedFileArray[2]));
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 task.setTarget(generatedFile);

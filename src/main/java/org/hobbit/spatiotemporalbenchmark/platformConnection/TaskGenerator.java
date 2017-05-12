@@ -61,6 +61,8 @@ LOGGER.info("done with expectedAnswerData - task generator");
             long timestamp = System.currentTimeMillis();
             sendTaskToSystemAdapter(taskId, taskData);
             LOGGER.info("Task " + taskId + " sent to System Adapter.");
+LOGGER.info("taskData "+new String(taskData));
+LOGGER.info("expectedAnswerData "+new String(expectedAnswerData));
 
             // Send the expected answer to the evaluation store
             sendTaskToEvalStorage(taskId, timestamp, expectedAnswerData);
