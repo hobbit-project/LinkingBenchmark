@@ -10,9 +10,9 @@ COPY configs/* /LinkingBenchmark/configs/
 
 COPY lib/* /LinkingBenchmark/lib/
 
-COPY datasets/SourceDatasets/ /LinkingBenchmark/datasets/SourceDatasets/
+COPY datasets/SourceDatasets/ /LinkingBenchmark/datasets/SourceDatasets/*
 
-COPY datasets/TargetDatasets/ /LinkingBenchmark/datasets/TargetDatasets/
+COPY datasets/TargetDatasets/ /LinkingBenchmark/datasets/TargetDatasets/*
 
 CMD java -cp LinkingBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatiotemporalbenchmark.platformConnection.systems.LinkingSystemAdapter
 
