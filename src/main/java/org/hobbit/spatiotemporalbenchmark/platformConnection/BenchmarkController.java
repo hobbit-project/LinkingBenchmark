@@ -28,7 +28,9 @@ public class BenchmarkController extends AbstractBenchmarkController {
     private static final String DATA_GENERATOR_CONTAINER_IMAGE = "linking_data-generator";
     private static final String TASK_GENERATOR_CONTAINER_IMAGE = "linking_task-generator";
     private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "linking_evaluation-module";
-    private String[] envVariablesEvaluationModule;
+     private String[] envVariablesEvaluationModule = null;
+    private String[] evalStorageEnvVariables = null;    
+    private String[] envVariablesDataGenerator = null;
 
     @Override
     public void init() throws Exception {
@@ -49,7 +51,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
 
 
         // data generators environmental values
-        String[] envVariablesDataGenerator = new String[]{
+        envVariablesDataGenerator = new String[]{
             PlatformConstants.NUMBER_OF_DATA_GENERATORS + "=" + numberOfDataGenerators,
             PlatformConstants.GENERATED_POPULATION + "=" + population,
             PlatformConstants.GENERATED_DATA_FORMAT + "=" + serializationFormat,
@@ -71,9 +73,9 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.EVALUATION_TIME_PERFORMANCE + "=" + "http://w3id.org/bench#timePerformance"
         };
 
-        envVariablesEvaluationModule = ArrayUtils.add(DEFAULT_EVAL_STORAGE_PARAMETERS,
+        evalStorageEnvVariables = ArrayUtils.add(DEFAULT_EVAL_STORAGE_PARAMETERS,
                 Constants.RABBIT_MQ_HOST_NAME_KEY + "=" + this.rabbitMQHostName);
-        envVariablesEvaluationModule = ArrayUtils.add(envVariablesEvaluationModule, "ACKNOWLEDGEMENT_FLAG=true");
+        evalStorageEnvVariables = ArrayUtils.add(evalStorageEnvVariables, "ACKNOWLEDGEMENT_FLAG=true");
 
         // Create data generators
         createDataGenerators(DATA_GENERATOR_CONTAINER_IMAGE, numberOfDataGenerators, envVariablesDataGenerator);
@@ -84,7 +86,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         LOGGER.info("Task Generators created successfully.");
 
         // Create evaluation storage
-        createEvaluationStorage();
+        createEvaluationStorage(DEFAULT_EVAL_STORAGE_IMAGE, evalStorageEnvVariables);
         LOGGER.info("Evaluation Storage created successfully.");
 
         waitForComponentsToInitialize();
