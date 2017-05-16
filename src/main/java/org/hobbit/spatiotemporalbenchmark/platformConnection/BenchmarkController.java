@@ -5,8 +5,10 @@ package org.hobbit.spatiotemporalbenchmark.platformConnection;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.hobbit.core.Commands;
+import org.hobbit.core.Constants;
 import org.hobbit.core.components.AbstractBenchmarkController;
 import org.hobbit.spatiotemporalbenchmark.platformConnection.util.PlatformConstants;
 import org.slf4j.Logger;
@@ -68,6 +70,10 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.EVALUATION_FMEASURE + "=" + "http://w3id.org/bench#fmeasure",
             PlatformConstants.EVALUATION_TIME_PERFORMANCE + "=" + "http://w3id.org/bench#timePerformance"
         };
+
+        envVariablesEvaluationModule = ArrayUtils.add(DEFAULT_EVAL_STORAGE_PARAMETERS,
+                Constants.RABBIT_MQ_HOST_NAME_KEY + "=" + this.rabbitMQHostName);
+        envVariablesEvaluationModule = ArrayUtils.add(envVariablesEvaluationModule, "ACKNOWLEDGEMENT_FLAG=true");
 
         // Create data generators
         createDataGenerators(DATA_GENERATOR_CONTAINER_IMAGE, numberOfDataGenerators, envVariablesDataGenerator);
