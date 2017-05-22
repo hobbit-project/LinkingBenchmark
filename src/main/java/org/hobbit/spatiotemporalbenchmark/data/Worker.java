@@ -187,31 +187,35 @@ public class Worker extends AbstractWorker {
                             for (int i = 0; i < sourceTrace.getPointsOfTrace().size(); i++) {
                                 model.addAll(sourceTrace.getPointsOfTrace().get(i));
                             }
-                            Rio.write(model, sourceFos, rdfFormat);
+                            if (!model.isEmpty()) {
+                                Rio.write(model, sourceFos, rdfFormat);
+                            }
                             //target instance
                             //here I have the extended source trace because I want to know the coordinates of the 
                             //when havind a label
                             Model targetSesameModel = create.targetInstance(create.getExtendedSourceTrace());
                             //apply uri change and transformations on instance to create target.
-                            Rio.write(targetSesameModel, targetFos, rdfFormat);
+                            if (targetSesameModel.isEmpty()) {
+                                Rio.write(targetSesameModel, targetFos, rdfFormat);
 
-                            //detailed gold standard
-                            Model detailedGS = create.getDetailedGSModel();
-                            Rio.write(detailedGS, detailedGSFos, rdfFormat);
+                                //detailed gold standard
+                                Model detailedGS = create.getDetailedGSModel();
+                                Rio.write(detailedGS, detailedGSFos, rdfFormat);
 
-                            //simple gold standard
-                            Model GS = create.getGSModel();
-                            Rio.write(GS, gsFos, rdfFormat);
+                                //simple gold standard
+                                Model GS = create.getGSModel();
+                                Rio.write(GS, gsFos, rdfFormat);
 
-                            //oaei gold standard
-                            Iterator<Statement> itGS = GS.iterator();
-                            Statement stGS = itGS.next();
-                            try {
-                                oaeiRDF.addMapping2Output(stGS.getSubject().stringValue(), stGS.getObject().stringValue(), 0, 1.0);
-                                //oaei.addMapping2Output(stGS.getSubject().stringValue(), stGS.getObject().stringValue(), 0, 1.0);
+                                //oaei gold standard
+                                Iterator<Statement> itGS = GS.iterator();
+                                Statement stGS = itGS.next();
+                                try {
+                                    oaeiRDF.addMapping2Output(stGS.getSubject().stringValue(), stGS.getObject().stringValue(), 0, 1.0);
+                                    //oaei.addMapping2Output(stGS.getSubject().stringValue(), stGS.getObject().stringValue(), 0, 1.0);
 
-                            } catch (Exception e1) {
-                                e1.printStackTrace();
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                }
                             }
                             givenInstanceModel = new LinkedHashModel();
                         }

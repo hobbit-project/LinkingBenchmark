@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 import org.hobbit.spatiotemporalbenchmark.Trace;
 import org.hobbit.spatiotemporalbenchmark.transformations.Transformation;
-import org.hobbit.spatiotemporalbenchmark.transformations.TransformationsCall;
 import org.hobbit.spatiotemporalbenchmark.transformations.value.CoordinatesToAddress;
 import org.hobbit.spatiotemporalbenchmark.transformations.value.AddPoint;
 import org.hobbit.spatiotemporalbenchmark.util.RandomUtil;

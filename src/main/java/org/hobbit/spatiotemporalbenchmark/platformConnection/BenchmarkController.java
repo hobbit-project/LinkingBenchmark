@@ -5,10 +5,8 @@ package org.hobbit.spatiotemporalbenchmark.platformConnection;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.hobbit.core.Commands;
-import org.hobbit.core.Constants;
 import org.hobbit.core.components.AbstractBenchmarkController;
 import org.hobbit.spatiotemporalbenchmark.platformConnection.util.PlatformConstants;
 import org.slf4j.Logger;
@@ -21,15 +19,14 @@ import org.slf4j.LoggerFactory;
 public class BenchmarkController extends AbstractBenchmarkController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkController.class);
-//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialdatagenerator";
-//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialtaskgenerator";
-//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialevaluationmodule";
+    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingdatagenerator";
+    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingtaskgenerator";
+    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingevaluationmodule";
 
-    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "linking_data-generator";
-    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "linking_task-generator";
-    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "linking_evaluation-module";
+//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "linking_data-generator";
+//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "linking_task-generator";
+//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "linking_evaluation-module";
      private String[] envVariablesEvaluationModule = null;
-    private String[] evalStorageEnvVariables = null;    
     private String[] envVariablesDataGenerator = null;
 
     @Override
@@ -73,10 +70,6 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.EVALUATION_TIME_PERFORMANCE + "=" + "http://w3id.org/bench#timePerformance"
         };
 
-        evalStorageEnvVariables = ArrayUtils.add(DEFAULT_EVAL_STORAGE_PARAMETERS,
-                Constants.RABBIT_MQ_HOST_NAME_KEY + "=" + this.rabbitMQHostName);
-        evalStorageEnvVariables = ArrayUtils.add(evalStorageEnvVariables, "ACKNOWLEDGEMENT_FLAG=true");
-
         // Create data generators
         createDataGenerators(DATA_GENERATOR_CONTAINER_IMAGE, numberOfDataGenerators, envVariablesDataGenerator);
         LOGGER.info("Initilalizing Benchmark Controller...");
@@ -86,7 +79,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         LOGGER.info("Task Generators created successfully.");
 
         // Create evaluation storage
-        createEvaluationStorage(DEFAULT_EVAL_STORAGE_IMAGE, evalStorageEnvVariables);
+        createEvaluationStorage();
         LOGGER.info("Evaluation Storage created successfully.");
 
         waitForComponentsToInitialize();
