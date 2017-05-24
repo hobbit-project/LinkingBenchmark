@@ -48,6 +48,5 @@ public class PointsAddressesCache {
         } catch (IOException ex) {
             Logger.getLogger(CoordinatesToAddress.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 }

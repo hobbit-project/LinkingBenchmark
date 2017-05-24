@@ -195,7 +195,7 @@ public class Worker extends AbstractWorker {
                             //when havind a label
                             Model targetSesameModel = create.targetInstance(create.getExtendedSourceTrace());
                             //apply uri change and transformations on instance to create target.
-                            if (targetSesameModel.isEmpty()) {
+                            if (!targetSesameModel.isEmpty()) {
                                 Rio.write(targetSesameModel, targetFos, rdfFormat);
 
                                 //detailed gold standard

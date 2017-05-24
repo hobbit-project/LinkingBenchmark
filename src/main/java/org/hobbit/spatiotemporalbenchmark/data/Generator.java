@@ -85,7 +85,6 @@ public class Generator {
             call.valueBasedCases(); //check
             transform = (DataValueTransformation) call.getValueTransformationConfiguration(); //check
             System.out.println("exec configurations instances " + getConfigurations().getString(Configurations.INSTANCES));
-
             Worker worker = new Worker();
             worker.execute();
 
