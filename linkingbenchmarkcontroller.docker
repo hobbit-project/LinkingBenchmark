@@ -9,6 +9,8 @@ COPY test.properties /LinkingBenchmark/
 
 COPY definitions.properties /LinkingBenchmark/
 
+COPY PointsAddressesMap.txt /LinkingBenchmark/
+
 COPY datasets/* /LinkingBenchmark/datasets/
 
 COPY datasets/givenDatasets/* /LinkingBenchmark/datasets/givenDatasets/
@@ -19,6 +21,6 @@ COPY datasets/TargetDatasets/* /LinkingBenchmark/datasets/TargetDatasets/
 
 COPY datasets/GoldStandards/* /LinkingBenchmark/datasets/GoldStandards/
 
-CMD java -cp LinkingBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatiotemporalbenchmark.platformConnection.BenchmarkController
+CMD java -Xms100G -Xmx200G -cp LinkingBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatiotemporalbenchmark.platformConnection.BenchmarkController
 
 
