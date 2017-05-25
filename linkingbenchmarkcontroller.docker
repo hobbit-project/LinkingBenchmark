@@ -15,11 +15,11 @@ COPY datasets/* /LinkingBenchmark/datasets/
 
 COPY datasets/givenDatasets/* /LinkingBenchmark/datasets/givenDatasets/
 
-COPY datasets/SourceDatasets/* /LinkingBenchmark/datasets/SourceDatasets/
+COPY datasets/SourceDatasets/ /LinkingBenchmark/datasets/SourceDatasets/
 
-COPY datasets/TargetDatasets/* /LinkingBenchmark/datasets/TargetDatasets/
+COPY datasets/TargetDatasets/ /LinkingBenchmark/datasets/TargetDatasets/
 
-COPY datasets/GoldStandards/* /LinkingBenchmark/datasets/GoldStandards/
+COPY datasets/GoldStandards/ /LinkingBenchmark/datasets/GoldStandards/
 
 CMD java -Xms100G -Xmx200G -cp LinkingBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatiotemporalbenchmark.platformConnection.BenchmarkController
 
