@@ -91,7 +91,7 @@ public class Worker extends AbstractWorker {
         String targetFileName = String.format(TARGET_FILENAME + rdfFormat.getDefaultFileExtension(), targetDestination, File.separator, currentFilesCount);
         String gsFileName = String.format(GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), goldStandardDestination, File.separator, currentFilesCount);
         String extendedGSFileName = String.format(DETAILED_GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), detailedGoldStandardDestination, File.separator, currentFilesCount);
-        String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), OAEIGoldStandardDestination, File.separator, currentFilesCount);
+        String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + "rdf", OAEIGoldStandardDestination, File.separator, currentFilesCount);
 
         RDFFormat format = RDFFormat.TURTLE; //TODO: change this format based on mimicking algorithm later!
         String path = getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);

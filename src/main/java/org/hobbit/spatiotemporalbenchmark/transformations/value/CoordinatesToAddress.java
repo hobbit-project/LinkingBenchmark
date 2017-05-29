@@ -40,20 +40,27 @@ public class CoordinatesToAddress implements DataValueTransformation {
         String strAddress = "";
         String point = latitude + "," + longitude;
         if (pointAddressMap.containsKey(point)) {
+            System.out.println("Retrieving address from cache");
             strAddress = pointAddressMap.get(point);
         } else if (!googleMapsApiLimit) {
+            System.out.println("Retrieving address from googleMapsApi");
             strAddress = AddressFromGoogleMapsApi.getAddress(latitude, longitude);
             if (strAddress.equals("")) {
+                System.out.println("googleMapsApi limit");
                 googleMapsApiLimit = true;
             }
         } else if (!foursquareApiLimit) {
+            System.out.println("Retrieving address from foursquareApi");
             strAddress = AddressFromFoursquareApi.getAddress(latitude, longitude);
             if (strAddress.equals("")) {
+                System.out.println("foursquareApi limit");
                 foursquareApiLimit = true;
             }
         } else if (!nominatimLimit) {
+            System.out.println("Retrieving address from nominatim");
             strAddress = AddressFromNominatim.getAddress(latitude, longitude);
             if (strAddress.equals("")) {
+                System.out.println("nominatim limit");
                 nominatimLimit = true;
             }
         }

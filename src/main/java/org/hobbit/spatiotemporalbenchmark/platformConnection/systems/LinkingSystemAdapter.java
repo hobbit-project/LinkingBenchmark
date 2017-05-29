@@ -140,7 +140,6 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
         output.setPrefixes(config.getPrefixes());
         output.writeToFile(mappings.getAcceptanceMapping(), config.getAcceptanceRelation(), config.getAcceptanceFile());
     }
-    
 
     @Override
     public void close() throws IOException {
@@ -150,4 +149,3 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
         LOGGER.info("System Adapter closed successfully.");
     }
 }
-

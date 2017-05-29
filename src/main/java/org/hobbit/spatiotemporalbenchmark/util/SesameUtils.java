@@ -15,6 +15,8 @@ public class SesameUtils {
             rdfFormat = RDFFormat.TRIX;
         } else if (serializationFormat.equalsIgnoreCase("N-Triples")) {
             rdfFormat = RDFFormat.NTRIPLES;
+        } else if (serializationFormat.equalsIgnoreCase("NTriples")) {
+            rdfFormat = RDFFormat.NTRIPLES;
         } else if (serializationFormat.equalsIgnoreCase("N-Quads")) {
             rdfFormat = RDFFormat.NQUADS;
         } else if (serializationFormat.equalsIgnoreCase("N3")) {
