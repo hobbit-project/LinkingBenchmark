@@ -20,6 +20,7 @@ import org.hobbit.spatiotemporalbenchmark.data.Worker;
 import org.hobbit.spatiotemporalbenchmark.platformConnection.util.PlatformConstants;
 import org.hobbit.spatiotemporalbenchmark.properties.Configurations;
 import org.hobbit.spatiotemporalbenchmark.properties.Definitions;
+import org.hobbit.spatiotemporalbenchmark.transformations.PointsAddressesCache;
 import org.hobbit.spatiotemporalbenchmark.util.AllocationsUtil;
 
 /**
@@ -69,6 +70,8 @@ public class DataGenerator extends AbstractDataGenerator {
         // Given the above input, update configuration files that are necessary for data generation
         reInitializeProperties();
 
+        new PointsAddressesCache();
+
         task = new Task(Integer.toString(taskId++), null, null);
 
     }
@@ -101,7 +104,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-                
+
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 // send data to system
@@ -162,7 +165,7 @@ public class DataGenerator extends AbstractDataGenerator {
         addRemovePoints = (String) getFromEnv(env, PlatformConstants.ADD_REMOVE_POINTS, "");
         targetPointsTransformations = (String) getFromEnv(env, PlatformConstants.TARGET_POINTS_TRANSFORMATIONS, "");
         valueBasedTransformations = (String) getFromEnv(env, PlatformConstants.VALUE_BASED_TRANSFORMATIONS, "");
-        
+
 //        LOGGER.info("keepPoints " + keepPoints);
 //        LOGGER.info("severity " + severity); 
 //        LOGGER.info("changeTimestamp " + changeTimestamp);
@@ -170,7 +173,6 @@ public class DataGenerator extends AbstractDataGenerator {
 //        LOGGER.info("addRemovePoints " + addRemovePoints);
 //        LOGGER.info("targetPointsTransformations " + targetPointsTransformations);
 //        LOGGER.info("valueBasedTransformations " + valueBasedTransformations);
-        
     }
 
     /**
@@ -198,7 +200,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 return (T) (Long) Long.parseLong(env.get(parameter));
             } else if (paramType instanceof Double) {
                 return (T) (Double) Double.parseDouble(env.get(parameter));
-            }else if (paramType instanceof Float) {
+            } else if (paramType instanceof Float) {
                 return (T) (Float) Float.parseFloat(env.get(parameter));
             }
         } catch (Exception e) {
@@ -222,7 +224,7 @@ public class DataGenerator extends AbstractDataGenerator {
         getConfigurations().setStringProperty(Configurations.DATASETS_PATH, datasetsPath);
         getConfigurations().setStringProperty(Configurations.GIVEN_DATASETS_PATH, givenDatasetsPath);
         getConfigurations().setStringProperty(Configurations.VALUE_SEVERITY, String.valueOf(severity));
-        
+
 //TODO : check if keep points < 1.0
         ArrayList<Double> points = new ArrayList<Double>();
         points.add(Double.parseDouble(Float.toString(keepPoints)));
@@ -241,7 +243,7 @@ public class DataGenerator extends AbstractDataGenerator {
         sourceLabels.add(Double.parseDouble(Float.toString(sourcePointsToLabels)));
         sourceLabels.add(1.0 - Double.parseDouble(Float.toString(sourcePointsToLabels)));
         Definitions.valueSourceAllocation = new AllocationsUtil(sourceLabels, random);
-        
+
         //add/remove points
         Definitions.addRemovePointAllocation = new AllocationsUtil(stringToArray(addRemovePoints), random);
 
