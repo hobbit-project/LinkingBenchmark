@@ -32,7 +32,7 @@ public class Generator {
         definitions = new Definitions();
         randomGenerator = new Random(0);//is important not to remove seed from random (deterministic)
         call = new TransformationsCall();
-        new PointsAddressesCache();
+
 
     }
 

@@ -46,7 +46,11 @@ public class CreateInstances extends Generator {
     public void sourceInstance(Model givenModel) {
         //Model sourceModel = new LinkedHashModel();
         trace = new Trace();
+
         extendedTrace = new Trace();
+//        System.out.println("trace size start " + trace.getPointsOfTrace().size());
+//        System.out.println("extendedTrace size start " + extendedTrace.getPointsOfTrace().size());
+
         Model point = new LinkedHashModel();
         Model extendedPoint = new LinkedHashModel();
 
@@ -100,6 +104,9 @@ public class CreateInstances extends Generator {
                 extendedPoint.add(statement);
             }
         }
+        System.out.println("trace size end " + trace.getPointsOfTrace().size());
+        System.out.println("extendedTrace size end " + extendedTrace.getPointsOfTrace().size());
+
     }
 
     public Model targetInstance(Trace sourceTrace) {
@@ -114,7 +121,6 @@ public class CreateInstances extends Generator {
 //        Transformation transformationClass = getValueTransformation();
 //        System.out.println("transformationClass " + transformationClass.getClass().toString());
 //        String transformation = StringUtil.getClassName(transformationClass.getClass().toString());
-
         for (int i = 0; i < sourceTrace.getPointsOfTrace().size(); i++) {
 
             //add delete points here    
@@ -124,7 +130,7 @@ public class CreateInstances extends Generator {
                 Transformation addDelete = getTransformationsCall().getAdditionDeletionPointConfiguration();
                 if (addDelete != null) {
 //                    System.out.println("addDelete " +addDelete.toString());
-                
+
                     if (StringUtil.getClassName(addDelete.getClass().toString()).equals("DeletePoint")) {
                         Iterator<Statement> it = sourcePointModel.iterator();
                         Statement statement = it.next();
@@ -174,60 +180,60 @@ public class CreateInstances extends Generator {
                     Value targetObject = targetObject(statement);
                     if (targetObject == null) {
 //                        if (transformation.contains("VALUE")) {
-                            if (statement.getPredicate().getLocalName().equals("label")) { //maybe i can make this: object instanceof String
-                                getTransformationsCall().valueBasedCases();
-                                Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
+                        if (statement.getPredicate().getLocalName().equals("label")) { //maybe i can make this: object instanceof String
+                            getTransformationsCall().valueBasedCases();
+                            Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
 //                                System.out.println("transform 1 " +transform);
-                                if (transform != null) { //transformation case
-                                    String targetObjectStr = transform.execute(statement.getObject().stringValue()).toString();
-                                    Value targetObjectLiteral = ValueFactoryImpl.getInstance().createLiteral(targetObjectStr, XMLSchema.STRING);
-                                    targetModel.add(targetURI, statement.getPredicate(), targetObjectLiteral, statement.getContext());
-                                    //detailed gs 
-                                    WriteDetailedGS(statement.getSubject(), targetURI, StringUtil.getClassName(transform.getClass().toString()), "label");
-                                } else {
-                                    targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
-                                }
-                                //skip long lat if there is a label, we keep all info in order to be able to add new points
-                                statement = it.next();
-                                statement = it.next();
-                            } else if (statement.getPredicate().getLocalName().equals("hasTimestamp")) {
-                                getTransformationsCall().TimestampCases();
-                                Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
+                            if (transform != null) { //transformation case
+                                String targetObjectStr = transform.execute(statement.getObject().stringValue()).toString();
+                                Value targetObjectLiteral = ValueFactoryImpl.getInstance().createLiteral(targetObjectStr, XMLSchema.STRING);
+                                targetModel.add(targetURI, statement.getPredicate(), targetObjectLiteral, statement.getContext());
+                                //detailed gs 
+                                WriteDetailedGS(statement.getSubject(), targetURI, StringUtil.getClassName(transform.getClass().toString()), "label");
+                            } else {
+                                targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
+                            }
+                            //skip long lat if there is a label, we keep all info in order to be able to add new points
+                            statement = it.next();
+                            statement = it.next();
+                        } else if (statement.getPredicate().getLocalName().equals("hasTimestamp")) {
+                            getTransformationsCall().TimestampCases();
+                            Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
 //                                 System.out.println("transform 2 " +transform);
-                                if (transform != null) { //transformation case
-                                    String targetObjectStr = transform.execute(statement.getObject().stringValue()).toString();
-                                    Value targetObjectLiteral = ValueFactoryImpl.getInstance().createLiteral(targetObjectStr);
+                            if (transform != null) { //transformation case
+                                String targetObjectStr = transform.execute(statement.getObject().stringValue()).toString();
+                                Value targetObjectLiteral = ValueFactoryImpl.getInstance().createLiteral(targetObjectStr);
 
-                                    targetModel.add(targetURI, statement.getPredicate(), targetObjectLiteral, statement.getContext());
-                                    //detailed gs 
-                                    WriteDetailedGS(statement.getSubject(), targetURI, StringUtil.getClassName(transform.getClass().toString()), "hasTimestamp");
-                                } else {
-                                    targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
-                                }
-                            } else if (statement.getPredicate().getLocalName().equals("lat")) {
-                                getTransformationsCall().CoordinateCases();
-                                Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
+                                targetModel.add(targetURI, statement.getPredicate(), targetObjectLiteral, statement.getContext());
+                                //detailed gs 
+                                WriteDetailedGS(statement.getSubject(), targetURI, StringUtil.getClassName(transform.getClass().toString()), "hasTimestamp");
+                            } else {
+                                targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
+                            }
+                        } else if (statement.getPredicate().getLocalName().equals("lat")) {
+                            getTransformationsCall().CoordinateCases();
+                            Transformation transform = getTransformationsCall().getValueTransformationConfiguration();
 //                                 System.out.println("transform 3 " +transform);
-                                if (transform != null) { //transformation case
-                                    Statement st1 = statement;
-                                    Statement st2 = it.next();
-                                    Model model = transform.execute(st1, st2);
-                                    if (model != null) {
-                                        Iterator<Statement> itm = model.iterator();
-                                        while (itm.hasNext()) {
-                                            Statement stm = itm.next();
-                                            targetModel.add(targetURI, stm.getPredicate(), stm.getObject(), statement.getContext());
-                                        }
-                                        //detailed gs 
-                                        WriteDetailedGS(statement.getSubject(), targetURI, StringUtil.getClassName(transform.getClass().toString()), "lat/long");
-                                    } else {
-                                        targetModel.add(targetURI, st1.getPredicate(), st1.getObject(), st1.getContext());
-                                        targetModel.add(targetURI, st2.getPredicate(), st2.getObject(), st2.getContext());
+                            if (transform != null) { //transformation case
+                                Statement st1 = statement;
+                                Statement st2 = it.next();
+                                Model model = transform.execute(st1, st2);
+                                if (model != null) {
+                                    Iterator<Statement> itm = model.iterator();
+                                    while (itm.hasNext()) {
+                                        Statement stm = itm.next();
+                                        targetModel.add(targetURI, stm.getPredicate(), stm.getObject(), statement.getContext());
                                     }
-
+                                    //detailed gs 
+                                    WriteDetailedGS(statement.getSubject(), targetURI, StringUtil.getClassName(transform.getClass().toString()), "lat/long");
                                 } else {
-                                    targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
+                                    targetModel.add(targetURI, st1.getPredicate(), st1.getObject(), st1.getContext());
+                                    targetModel.add(targetURI, st2.getPredicate(), st2.getObject(), st2.getContext());
                                 }
+
+                            } else {
+                                targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
+                            }
 
 //                            }else {
 //                                targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
@@ -237,7 +243,6 @@ public class CreateInstances extends Generator {
 //                            //skip long lat if there is a label, we keep all info in order to be able to add new points
 //                            statement = it.next();
 //                            statement = it.next();
-
                         } else {
                             targetModel.add(targetURI, statement.getPredicate(), statement.getObject(), statement.getContext());
                         }
