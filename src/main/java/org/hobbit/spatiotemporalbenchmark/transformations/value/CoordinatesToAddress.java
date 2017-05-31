@@ -42,7 +42,8 @@ public class CoordinatesToAddress implements DataValueTransformation {
         if (pointAddressMap.containsKey(point)) {
 //            System.out.println("Retrieving address from cache");
             strAddress = pointAddressMap.get(point);
-        } else if (!googleMapsApiLimit) {
+        } 
+        else if (!googleMapsApiLimit) {
 //            System.out.println("Retrieving address from googleMapsApi");
             strAddress = AddressFromGoogleMapsApi.getAddress(latitude, longitude);
             if (strAddress.equals("")) {

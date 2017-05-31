@@ -33,7 +33,7 @@ import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
 
 public class Worker extends AbstractWorker {
-
+    
     protected long totalTriplesForWorker;
     protected String destinationPath;
     protected String serializationFormat;
@@ -50,7 +50,7 @@ public class Worker extends AbstractWorker {
         this.destinationPath = getConfigurations().getString(Configurations.DATASETS_PATH);
         this.serializationFormat = getConfigurations().getString(Configurations.GENERATED_DATA_FORMAT);
     }
-
+    
     @Override
     public void execute() throws Exception {
         FileOutputStream sourceFos = null;
@@ -59,13 +59,13 @@ public class Worker extends AbstractWorker {
         FileOutputStream detailedGSFos = null;
         FileOutputStream oaeiGSFos = null;
         RDFFormat rdfFormat = SesameUtils.parseRdfFormat(serializationFormat);
-
+        
         String sourceDestination = destinationPath + "/SourceDatasets";
         String targetDestination = destinationPath + "/TargetDatasets";
         String goldStandardDestination = destinationPath + "/GoldStandards";
         String detailedGoldStandardDestination = destinationPath + "/DetailedGoldStandards";
         String OAEIGoldStandardDestination = destinationPath + "/OAEIGoldStandards";
-
+        
         File theFileS = new File(sourceDestination);
         theFileS.mkdirs();
         FileUtils.cleanDirectory(theFileS); // will create a folder for the transformed data if not exists                     
@@ -73,31 +73,30 @@ public class Worker extends AbstractWorker {
         File theFileT = new File(targetDestination);
         theFileT.mkdirs();
         FileUtils.cleanDirectory(theFileT);
-
+        
         File theFilegs = new File(goldStandardDestination);
         theFilegs.mkdirs();
         FileUtils.cleanDirectory(theFilegs);
-
+        
         File theFileDetailedGS = new File(detailedGoldStandardDestination);
         theFileDetailedGS.mkdirs();
         FileUtils.cleanDirectory(theFileDetailedGS);
-
+        
         File theFileOAEIGS = new File(OAEIGoldStandardDestination);
         theFileOAEIGS.mkdirs();
         FileUtils.cleanDirectory(theFileOAEIGS);
-
+        
         long currentFilesCount = getAtomicLong().incrementAndGet();
         String sourceFileName = String.format(SOURCE_FILENAME + rdfFormat.getDefaultFileExtension(), sourceDestination, File.separator, currentFilesCount);
         String targetFileName = String.format(TARGET_FILENAME + rdfFormat.getDefaultFileExtension(), targetDestination, File.separator, currentFilesCount);
         String gsFileName = String.format(GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), goldStandardDestination, File.separator, currentFilesCount);
         String extendedGSFileName = String.format(DETAILED_GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), detailedGoldStandardDestination, File.separator, currentFilesCount);
         String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + "rdf", OAEIGoldStandardDestination, File.separator, currentFilesCount);
-
+        
         RDFFormat format = RDFFormat.TURTLE; //TODO: change this format based on mimicking algorithm later!
         String path = getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
-
+        
         List<File> collectedFiles = new ArrayList<File>();
-        RepositoryConnection con = null;
 
         //TODO: if each file is not an instance any more on mimicking change this class
         //each file is an instance
@@ -119,23 +118,26 @@ public class Worker extends AbstractWorker {
             gsFos = new FileOutputStream(gsFileName);
             detailedGSFos = new FileOutputStream(extendedGSFileName);
             oaeiGSFos = new FileOutputStream(oaeiGSFileName);
+            CreateInstances create = new CreateInstances();
 
 //            System.out.println("numOfInstances 2 " + numOfInstances);
             for (int f = 0; f < numOfInstances; f++) {
                 Repository repository = new SailRepository(new MemoryStore());
-                con = null;
                 repository.initialize();
-                con = repository.getConnection();
+                
+                RepositoryConnection con = repository.getConnection();
                 con.add(collectedFiles.get(f), "", format);
+                System.out.println("con.size() " + con.size());
                 System.out.println("f " + f + " " + collectedFiles.get(f).getName());
+
                 //ids of traces for defined number of instances 
                 String queryNumInstances = "SELECT ?s WHERE {"
                         + "?s  a  <http://www.tomtom.com/ontologies/traces#Trace> . }"
                         + "LIMIT " + numOfInstances;
-
+                
                 TupleQuery query = con.prepareTupleQuery(QueryLanguage.SPARQL, queryNumInstances);
                 TupleQueryResult result = query.evaluate();
-
+                
                 BindingSet nextResult = result.next();
                 String traceID = nextResult.getBinding("s").getValue().stringValue();
                 System.out.println("traceID: " + traceID);
@@ -159,19 +161,17 @@ public class Worker extends AbstractWorker {
                         + "?o5 <http://www.tomtom.com/ontologies/traces#velocityValue> ?o6 . "
                         + "?o5 <http://www.tomtom.com/ontologies/traces#velocityMetric> ?o7 . "
                         + "}";
-
+                
                 GraphQueryResult graphResult = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString).evaluate();
                 Model resultsModel = QueryResults.asModel(graphResult);
-
-                CreateInstances create = new CreateInstances();
-
+                
                 Model givenInstanceModel = new LinkedHashModel();
                 Iterator<Statement> it = resultsModel.iterator();
 
                 //retrieve each Trace instance 
                 while (it.hasNext()) {
                     Statement statement = it.next();
-
+                    
                     if (statement.getObject().stringValue().endsWith("Trace") || !it.hasNext()) {
                         if (!givenInstanceModel.isEmpty()) {
                             //source instance - Trace
@@ -226,6 +226,10 @@ public class Worker extends AbstractWorker {
 //                finally {
 //                    con.close();
 //                }
+
+                con.clear();
+                con.close();
+                repository.shutDown();
             }
             try {
                 oaeiRDF.saveOutputFile();
@@ -233,37 +237,37 @@ public class Worker extends AbstractWorker {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            con.close();
+//            con.close();
             flushClose(sourceFos);
             flushClose(targetFos);
             flushClose(gsFos);
             flushClose(detailedGSFos);
             flushClose(oaeiGSFos);
-
+            
         } catch (RDFHandlerException e) {
-            con.close();
+//            con.close();
             flushClose(sourceFos);
             flushClose(targetFos);
             flushClose(gsFos);
             flushClose(detailedGSFos);
             flushClose(oaeiGSFos);
-
+            
             throw new IOException("A problem occurred while generating RDF data: " + e.getMessage());
         }
     }
-
+    
     protected synchronized void flushClose(OutputStream fos) throws IOException {
         if (fos != null) {
             fos.flush();
             fos.close();
         }
     }
-
+    
     @Override
     public Model createSourceModel(Model model) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public Model createTargetModel(Model model) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
