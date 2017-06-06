@@ -121,19 +121,21 @@ public class Worker extends AbstractWorker {
             CreateInstances create = new CreateInstances();
 
 //            System.out.println("numOfInstances 2 " + numOfInstances);
+
+               Repository repository = new SailRepository(new MemoryStore());
             for (int f = 0; f < numOfInstances; f++) {
-                Repository repository = new SailRepository(new MemoryStore());
+//                Repository repository = new SailRepository(new MemoryStore());
                 repository.initialize();
                 
                 RepositoryConnection con = repository.getConnection();
                 con.add(collectedFiles.get(f), "", format);
-//                System.out.println("con.size() " + con.size());
+                System.out.println("con.size() " + con.size());
                 System.out.println("f " + f + " " + collectedFiles.get(f).getName());
 
                 //ids of traces for defined number of instances 
                 String queryNumInstances = "SELECT ?s WHERE {"
-                        + "?s  a  <http://www.tomtom.com/ontologies/traces#Trace> . }"
-                        + "LIMIT " + numOfInstances;
+                        + "?s  a  <http://www.tomtom.com/ontologies/traces#Trace> . }";
+//                        + "LIMIT " + numOfInstances;
                 
                 TupleQuery query = con.prepareTupleQuery(QueryLanguage.SPARQL, queryNumInstances);
                 TupleQueryResult result = query.evaluate();
