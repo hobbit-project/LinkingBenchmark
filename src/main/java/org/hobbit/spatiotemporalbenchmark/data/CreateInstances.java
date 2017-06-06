@@ -118,8 +118,8 @@ public class CreateInstances extends Generator {
     }
 
     public Model targetInstance(Trace sourceTrace) {
-        detailedGSModel = new LinkedHashModel();
-        GSModel = new LinkedHashModel();
+//        detailedGSModel = new LinkedHashModel();
+//        GSModel = new LinkedHashModel();
 
         //uri change, delete-add points,and value based changes
         Resource targetURI = null;
@@ -303,6 +303,7 @@ public class CreateInstances extends Generator {
     }
 
     public void WriteDetailedGS(Resource sourceInstance, Resource targetInstance, String transformation, String property) {
+        this.detailedGSModel = new LinkedHashModel();
         URI predicate = ValueFactoryImpl.getInstance().createURI(exactmatch);
         this.detailedGSModel.add(sourceInstance, predicate, targetInstance); //value1 equals value2
 
@@ -330,12 +331,14 @@ public class CreateInstances extends Generator {
     }
 
     public void WriteDetailedGS(Resource subject, String transformation) {
+        this.detailedGSModel = new LinkedHashModel();
         URI type = ValueFactoryImpl.getInstance().createURI("http://www.type");
         Value transformation_ = ValueFactoryImpl.getInstance().createLiteral(transformation);
         this.detailedGSModel.add(subject, type, transformation_);
     }
 
     public void WriteGS(Resource sourceInstance, Resource targetInstance) {
+        this.GSModel = new LinkedHashModel();
         String pr = "http://www.w3.org/2002/07/owl#sameAs";
         URI predicate = ValueFactoryImpl.getInstance().createURI(pr);
         this.GSModel.add(sourceInstance, predicate, targetInstance); //value1 relation value2

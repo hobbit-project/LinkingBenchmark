@@ -126,7 +126,7 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
 
         mappings = getMapping(config);
         writeResults(mappings, config);
-
+        LOGGER.info("mappings " + mappings.toString());
         //delete cache folder 
         File folder = new File("./cache/");
         FileUtil.removeDirectory(folder);

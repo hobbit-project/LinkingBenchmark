@@ -97,23 +97,8 @@ public class DataGenerator extends AbstractDataGenerator {
 
             File gsPath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards");
             ArrayList<File> gsFiles = new ArrayList<File>(Arrays.asList(gsPath.listFiles()));
-            // send generated data to system adapter
-            for (File file : sourceFiles) {
-                byte[][] generatedFileArray = new byte[3][];
-                // send the file name and its content
-                generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
-                generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
-                generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-
-                // convert them to byte[]
-                byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
-                // send data to system
-                sendDataToSystemAdapter(generatedFile);
-                LOGGER.info(file.getAbsolutePath() + " (" + (double) file.length() / 1000 + " KB) sent to System Adapter.");
-
-            }
-
-            for (File file : gsFiles) {
+            
+for (File file : gsFiles) {
                 byte[][] generatedFileArray = new byte[3][];
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
@@ -121,8 +106,10 @@ public class DataGenerator extends AbstractDataGenerator {
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
+//                LOGGER.info("expected from data gen -----------------" + new String(generatedFileArray[2]));
 
                 task.setExpectedAnswers(generatedFile);
+
                 LOGGER.info("ExpectedAnswers successfully added to Task.");
             }
 
@@ -143,6 +130,24 @@ public class DataGenerator extends AbstractDataGenerator {
                 LOGGER.info("Target data successfully sent to Task Generator.");
             }
 
+
+            // send generated data to system adapter
+            for (File file : sourceFiles) {
+                byte[][] generatedFileArray = new byte[3][];
+                // send the file name and its content
+                generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
+                generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
+                generatedFileArray[2] = FileUtils.readFileToByteArray(file);
+
+                // convert them to byte[]
+                byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
+                // send data to system
+                sendDataToSystemAdapter(generatedFile);
+                LOGGER.info(file.getAbsolutePath() + " (" + (double) file.length() / 1000 + " KB) sent to System Adapter.");
+
+            }
+
+            
         } catch (Exception e) {
             LOGGER.error("Exception while sending file to System Adapter or Task Generator(s).", e);
         }

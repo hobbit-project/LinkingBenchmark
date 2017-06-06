@@ -127,7 +127,7 @@ public class Worker extends AbstractWorker {
                 
                 RepositoryConnection con = repository.getConnection();
                 con.add(collectedFiles.get(f), "", format);
-                System.out.println("con.size() " + con.size());
+//                System.out.println("con.size() " + con.size());
                 System.out.println("f " + f + " " + collectedFiles.get(f).getName());
 
                 //ids of traces for defined number of instances 

@@ -13,6 +13,12 @@ public class Main {
     private static Generator generateData;
 
     public static void main(String[] args) throws IOException {
+          //Get the jvm heap size.
+        long heapSize = Runtime.getRuntime().totalMemory();
+
+        //Print the jvm heap size.
+        System.out.println("Heap Size = " + heapSize);
+        
         new PointsAddressesCache();
         generateData = new Generator();
         getConfigurations().loadFromFile("test.properties");
