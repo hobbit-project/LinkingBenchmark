@@ -122,9 +122,9 @@ public class Worker extends AbstractWorker {
 
 //            System.out.println("numOfInstances 2 " + numOfInstances);
 
-               Repository repository = new SailRepository(new MemoryStore());
+//               Repository repository = new SailRepository(new MemoryStore());
             for (int f = 0; f < numOfInstances; f++) {
-//                Repository repository = new SailRepository(new MemoryStore());
+                Repository repository = new SailRepository(new MemoryStore());
                 repository.initialize();
                 
                 RepositoryConnection con = repository.getConnection();

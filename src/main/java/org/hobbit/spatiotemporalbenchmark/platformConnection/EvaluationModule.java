@@ -117,6 +117,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
         LOGGER.info("expected " + new String(expected));
 
         HashMap<String, String> expectedMap = new HashMap<String, String>();
+        if(dataAnswers != null){
             for (String answer : dataAnswers) {
                 answer = answer.trim();
                 if (answer != null && !answer.equals("")) {                    
@@ -138,7 +139,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
                 }
                 LOGGER.info("expected data into the map: " + expectedMap.toString());
             }
-
+    }
         // read received data
         LOGGER.info("Read received data");
         //handle empty results! 
@@ -150,6 +151,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
         LOGGER.info("receivedData----" + new String(receivedData) + "----");
 
         HashMap<String, String> receivedMap = new HashMap<String, String>();
+        if(receivedDataAnswers != null){
             for (String answer : receivedDataAnswers) {
                 answer = answer.trim();
                 if (answer != null && !answer.equals("")) {
@@ -163,7 +165,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
                 }
                 LOGGER.info("received data into the map: " + receivedMap.toString());
             }
-
+        }
 
         //TODO: check this again
         if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {
