@@ -1,17 +1,20 @@
 package org.hobbit.spatiotemporalbenchmark.platformConnection;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hobbit.core.components.AbstractDataGenerator;
 import org.hobbit.core.rabbit.RabbitMQUtils;
+import org.hobbit.core.rabbit.SimpleFileSender;
 import org.hobbit.spatiotemporalbenchmark.data.Generator;
 import static org.hobbit.spatiotemporalbenchmark.data.Generator.getConfigurations;
 import static org.hobbit.spatiotemporalbenchmark.data.Generator.getDefinitions;
@@ -85,6 +88,7 @@ public class DataGenerator extends AbstractDataGenerator {
 //        int dataGeneratorId = getGeneratorId();
 //        int numberOfGenerators = getNumberOfGenerators();
         LOGGER.info("Generate data.. ");
+        SimpleFileSender sender = null;
         try {
             Worker worker = new Worker();
             worker.execute();
@@ -97,59 +101,113 @@ public class DataGenerator extends AbstractDataGenerator {
 
             File gsPath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards");
             ArrayList<File> gsFiles = new ArrayList<File>(Arrays.asList(gsPath.listFiles()));
-            
-for (File file : gsFiles) {
-                byte[][] generatedFileArray = new byte[3][];
+
+            for (File file : gsFiles) {
+                byte[][] generatedFileArray = new byte[2][];
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
-                generatedFileArray[2] = FileUtils.readFileToByteArray(file);
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
-//                LOGGER.info("expected from data gen -----------------" + new String(generatedFileArray[2]));
 
                 task.setExpectedAnswers(generatedFile);
+
+                // define a queue name, e.g., read it from the environment
+                String queueName = "gs_file";
+                // create the sender
+                sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
+                InputStream is = null;
+                try {
+                    // create input stream, e.g., by opening a file
+                    is = new FileInputStream(file);
+                    // send data
+                    sender.streamData(is, file.getName());
+                } catch (Exception e) {
+                    // handle exception
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+
+                // close the sender
+                IOUtils.closeQuietly(sender);
 
                 LOGGER.info("ExpectedAnswers successfully added to Task.");
             }
 
             // send generated tasks along with their expected answers to task generator
             for (File file : targetFiles) {
-                byte[][] generatedFileArray = new byte[3][];
+                byte[][] generatedFileArray = new byte[2][];
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
-                generatedFileArray[2] = FileUtils.readFileToByteArray(file);
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 task.setTarget(generatedFile);
 
                 byte[] data = SerializationUtils.serialize(task);
 
+                // define a queue name, e.g., read it from the environment
+                String queueName = "target_file";
+                // create the sender
+                sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
+
+                InputStream is = null;
+                try {
+                    // create input stream, e.g., by opening a file
+                    is = new FileInputStream(file);
+                    // send data
+                    sender.streamData(is, file.getName());
+                } catch (Exception e) {
+                    // handle exception
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+
+                // close the sender
+                IOUtils.closeQuietly(sender);
+
                 sendDataToTaskGenerator(data);
                 LOGGER.info("Target data successfully sent to Task Generator.");
             }
 
-
             // send generated data to system adapter
             for (File file : sourceFiles) {
-                byte[][] generatedFileArray = new byte[3][];
+                byte[][] generatedFileArray = new byte[2][];
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
-                generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
+
+                // define a queue name, e.g., read it from the environment
+                String queueName = "source_file";
+
+                // create the sender
+                sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
+
+                InputStream is = null;
+                try {
+                    // create input stream, e.g., by opening a file
+                    is = new FileInputStream(file);
+                    // send data
+                    sender.streamData(is, file.getName());
+                } catch (Exception e) {
+                    // handle exception
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+
+                // close the sender
                 // send data to system
                 sendDataToSystemAdapter(generatedFile);
                 LOGGER.info(file.getAbsolutePath() + " (" + (double) file.length() / 1000 + " KB) sent to System Adapter.");
 
             }
 
-            
         } catch (Exception e) {
             LOGGER.error("Exception while sending file to System Adapter or Task Generator(s).", e);
+        } finally {
+            IOUtils.closeQuietly(sender);
         }
 
     }
@@ -170,14 +228,6 @@ for (File file : gsFiles) {
         addRemovePoints = (String) getFromEnv(env, PlatformConstants.ADD_REMOVE_POINTS, "");
         targetPointsTransformations = (String) getFromEnv(env, PlatformConstants.TARGET_POINTS_TRANSFORMATIONS, "");
         valueBasedTransformations = (String) getFromEnv(env, PlatformConstants.VALUE_BASED_TRANSFORMATIONS, "");
-
-//        LOGGER.info("keepPoints " + keepPoints);
-//        LOGGER.info("severity " + severity); 
-//        LOGGER.info("changeTimestamp " + changeTimestamp);
-//        LOGGER.info("sourcePointsToLabels " + sourcePointsToLabels);
-//        LOGGER.info("addRemovePoints " + addRemovePoints);
-//        LOGGER.info("targetPointsTransformations " + targetPointsTransformations);
-//        LOGGER.info("valueBasedTransformations " + valueBasedTransformations);
     }
 
     /**
@@ -230,7 +280,7 @@ for (File file : gsFiles) {
         getConfigurations().setStringProperty(Configurations.GIVEN_DATASETS_PATH, givenDatasetsPath);
         getConfigurations().setStringProperty(Configurations.VALUE_SEVERITY, String.valueOf(severity));
 
-//TODO : check if keep points < 1.0
+//TODO: do not allow double to be <0.0 and >1.0
         ArrayList<Double> points = new ArrayList<Double>();
         points.add(Double.parseDouble(Float.toString(keepPoints)));
         points.add(1.0 - Double.parseDouble(Float.toString(keepPoints)));

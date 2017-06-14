@@ -50,12 +50,10 @@ public class TaskGenerator extends AbstractTaskGenerator {
             ByteBuffer taskBuffer = ByteBuffer.wrap(target);
             String format = RabbitMQUtils.readString(taskBuffer);
             String path = RabbitMQUtils.readString(taskBuffer);
-            byte[] targetData = RabbitMQUtils.readByteArray(taskBuffer);
 
-            byte[][] taskDataArray = new byte[3][];
+            byte[][] taskDataArray = new byte[2][];
             taskDataArray[0] = RabbitMQUtils.writeString(format);
             taskDataArray[1] = RabbitMQUtils.writeString(path);
-            taskDataArray[2] = targetData;
             byte[] taskData = RabbitMQUtils.writeByteArrays(taskDataArray);
 
             byte[] expectedAnswerData = task.getExpectedAnswers();

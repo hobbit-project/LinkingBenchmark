@@ -11,7 +11,7 @@ public final class PlatformConstants {
     public static final String NUMBER_OF_DATA_GENERATORS = "number_of_generators";
     public static final String GENERATED_POPULATION = "generator_population";
     public static final String GENERATED_DATA_FORMAT = "generator_data_format";
-    public static final String KEEP_POINTS = "keep_points";    
+    public static final String KEEP_POINTS = "keep_points";
     public static final String SEVERITY = "severity";
     public static final String CHANGE_TIMESTAMP = "change_timestamp";
     public static final String SOURCE_POINTS_TO_LABELS = "source_points_to_labels";
@@ -20,25 +20,11 @@ public final class PlatformConstants {
     public static final String VALUE_BASED_TRANSFORMATIONS = "value_based_transformations";
 
     // =============== EVALUATION MODULE CONSTANTS ===============
-
     public static final String EVALUATION_RECALL = "evaluation_recall";
     public static final String EVALUATION_PRECISION = "evaluation_precision";
     public static final String EVALUATION_FMEASURE = "evaluation_fmeasure";
     public static final String EVALUATION_TIME_PERFORMANCE = "evaluation_time_performance";
 
+    public static final byte SYSTEM_ADAPTER_FINISHED = (byte) 100;
+
 }
-
-
-//        int numberOfDataGenerators 
-//        int population 
-//        String serializationFormat 
-//        double keepPoints 
-//        
-//        double severity 
-//        double removePoints 
-//        double changeTimestamp 
-//        double sourcePointsToLabels 
-
-//        String addRemovePoints 
-//        String pointsTransformation 
-//        String valueBasedTransformations 

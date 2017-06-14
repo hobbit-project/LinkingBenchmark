@@ -19,18 +19,19 @@ import org.slf4j.LoggerFactory;
 public class BenchmarkController extends AbstractBenchmarkController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkController.class);
-    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingdatagenerator";
-    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingtaskgenerator";
-    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingevaluationmodule";
+//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingdatagenerator";
+//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingtaskgenerator";
+//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/linkingevaluationmodule";
 
-//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "linking_data-generator";
-//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "linking_task-generator";
-//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "linking_evaluation-module";
-     private String[] envVariablesEvaluationModule = null;
+    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "linking_data-generator";
+    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "linking_task-generator";
+    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "linking_evaluation-module";
+    private String[] envVariablesEvaluationModule = null;
     private String[] envVariablesDataGenerator = null;
 
     @Override
     public void init() throws Exception {
+
         LOGGER.info("Initilalizing Benchmark Controller...");
         super.init();
 
@@ -38,14 +39,13 @@ public class BenchmarkController extends AbstractBenchmarkController {
         int population = (Integer) getProperty("http://w3id.org/bench#hasPopulation", 100);
         String serializationFormat = (String) getProperty("http://w3id.org/bench#linkingDataFormat", "ntriples");
         double keepPoints = (double) getProperty("http://w3id.org/bench#keepPoints", 0.3);
-        
+
         double severity = (double) getProperty("http://w3id.org/bench#severity", 0.3);
         double changeTimestamp = (double) getProperty("http://w3id.org/bench#changeTimestamp", 0.1);
         double sourcePointsToLabels = (double) getProperty("http://w3id.org/bench#sourcePointsToLabels", 0.1);
         String addRemovePoints = getProperty("http://w3id.org/bench#addRemovePoints", "0.1, 0.1, 0.8");
         String targetPointsTransformations = getProperty("http://w3id.org/bench#targetPointsTransformations", "0.1, 0.1, 0.8");
         String valueBasedTransformations = getProperty("http://w3id.org/bench#valueBasedTransformations", "0.05, 0.05, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2");
-
 
         // data generators environmental values
         envVariablesDataGenerator = new String[]{
@@ -61,7 +61,6 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.VALUE_BASED_TRANSFORMATIONS + "=" + valueBasedTransformations
         };
 
-    
         // get KPIs for evaluation module
         envVariablesEvaluationModule = new String[]{
             PlatformConstants.EVALUATION_RECALL + "=" + "http://w3id.org/bench#recall",
@@ -83,7 +82,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         LOGGER.info("Evaluation Storage created successfully.");
 
         waitForComponentsToInitialize();
-        LOGGER.info("All components initilized.");
+        LOGGER.info("All components initialized.");
     }
 
     /**
@@ -153,6 +152,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         // wait for the system to terminate
         LOGGER.info("Waiting for the system to terminate.");
         waitForSystemToFinish();
+        sendToCmdQueue(PlatformConstants.SYSTEM_ADAPTER_FINISHED);
         LOGGER.info("System terminated.");
 
         // create the evaluation module
