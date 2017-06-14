@@ -272,11 +272,6 @@ public class EvaluationModule extends AbstractEvaluationModule {
             LOGGER.info("my receiveCommand for gs");
             gsReceiver.terminate();
         }
-        //an to sustima thelei na steilei file..
-//        else if (Commands. == command) {
-//            LOGGER.info("my receiveCommand for gs");
-//            gsReceiver.terminate();          
-//        } 
         super.receiveCommand(command, data);
     }
 }
