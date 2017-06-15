@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.io.IOUtils;
@@ -103,33 +104,16 @@ public class DataGenerator extends AbstractDataGenerator {
             ArrayList<File> gsFiles = new ArrayList<File>(Arrays.asList(gsPath.listFiles()));
 
             for (File file : gsFiles) {
-                byte[][] generatedFileArray = new byte[2][];
+                byte[][] generatedFileArray = new byte[3][];
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
+                generatedFileArray[2] = FileUtils.readFileToByteArray(file);
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
+//                LOGGER.info("expected from data gen -----------------" + new String(generatedFileArray[2]));
 
                 task.setExpectedAnswers(generatedFile);
-
-                // define a queue name, e.g., read it from the environment
-                String queueName = "gs_file";
-                // create the sender
-                sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
-                InputStream is = null;
-                try {
-                    // create input stream, e.g., by opening a file
-                    is = new FileInputStream(file);
-                    // send data
-                    sender.streamData(is, file.getName());
-                } catch (Exception e) {
-                    // handle exception
-                } finally {
-                    IOUtils.closeQuietly(is);
-                }
-
-                // close the sender
-                IOUtils.closeQuietly(sender);
 
                 LOGGER.info("ExpectedAnswers successfully added to Task.");
             }
@@ -198,6 +182,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 }
 
                 // close the sender
+                IOUtils.closeQuietly(sender);
                 // send data to system
                 sendDataToSystemAdapter(generatedFile);
                 LOGGER.info(file.getAbsolutePath() + " (" + (double) file.length() / 1000 + " KB) sent to System Adapter.");

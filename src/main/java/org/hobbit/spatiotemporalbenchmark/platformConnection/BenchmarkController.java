@@ -152,7 +152,6 @@ public class BenchmarkController extends AbstractBenchmarkController {
         // wait for the system to terminate
         LOGGER.info("Waiting for the system to terminate.");
         waitForSystemToFinish();
-        sendToCmdQueue(PlatformConstants.SYSTEM_ADAPTER_FINISHED);
         LOGGER.info("System terminated.");
 
         // create the evaluation module

@@ -25,6 +25,5 @@ public final class PlatformConstants {
     public static final String EVALUATION_FMEASURE = "evaluation_fmeasure";
     public static final String EVALUATION_TIME_PERFORMANCE = "evaluation_time_performance";
 
-    public static final byte SYSTEM_ADAPTER_FINISHED = (byte) 100;
-
+   
 }

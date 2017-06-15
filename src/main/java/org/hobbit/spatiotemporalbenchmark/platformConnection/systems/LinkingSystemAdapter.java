@@ -10,6 +10,7 @@ import com.rabbitmq.client.ShutdownSignalException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.logging.Level;
 import static org.aksw.limes.core.controller.Controller.getConfig;
 import static org.aksw.limes.core.controller.Controller.getMapping;
@@ -64,7 +65,7 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
 
             sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");            
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
-//            LOGGER.info("receivedFiles " + Arrays.toString(receivedFiles));
+//LOGGER.info("receivedFiles 1 " + Arrays.toString(receivedFiles));
             receivedGeneratedDataFilePath = receivedFiles[0];
             LOGGER.info("Received data from receiveGeneratedData..");
 
@@ -85,9 +86,11 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
             String receivedGeneratedTaskFilePath = null;
             try {
 
-                targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "target_file");                
+                targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "task_target_file");                
                 String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
+//LOGGER.info("receivedFiles 2 " + Arrays.toString(receivedFiles));
                 receivedGeneratedTaskFilePath = receivedFiles[0];
+
 
             } catch (ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
                 java.util.logging.Logger.getLogger(LinkingSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
@@ -141,8 +144,7 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
         File folder = new File("./cache/");
         FileUtil.removeDirectory(folder);
 
-        //do I need to send a file instead ? 
-        
+        //do I need to send a file instead ?         
         LOGGER.info("limesController finished..");
     }
 
