@@ -37,6 +37,7 @@ public class DataGenerator extends AbstractDataGenerator {
 
     private int numberOfDataGenerators; //TODO: use this
     private int population;
+    private int seed;
     public static String serializationFormat;
     private float keepPoints;
     private float severity;
@@ -204,9 +205,9 @@ public class DataGenerator extends AbstractDataGenerator {
         Map<String, String> env = System.getenv();
         serializationFormat = (String) getFromEnv(env, PlatformConstants.GENERATED_DATA_FORMAT, "");
         population = (Integer) getFromEnv(env, PlatformConstants.GENERATED_POPULATION, 0);
+                seed = (Integer) getFromEnv(env, PlatformConstants.GENERATED_TOMTOM_SEED, 0);
         numberOfDataGenerators = (Integer) getFromEnv(env, PlatformConstants.NUMBER_OF_DATA_GENERATORS, 0);
         keepPoints = (float) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0f);
-
         severity = (float) getFromEnv(env, PlatformConstants.SEVERITY, 0.0f);
         changeTimestamp = (float) getFromEnv(env, PlatformConstants.CHANGE_TIMESTAMP, 0.0f);
         sourcePointsToLabels = (float) getFromEnv(env, PlatformConstants.SOURCE_POINTS_TO_LABELS, 0.0f);

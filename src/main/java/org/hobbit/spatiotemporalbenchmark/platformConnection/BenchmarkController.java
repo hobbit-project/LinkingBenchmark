@@ -37,6 +37,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
 
         int numberOfDataGenerators = (Integer) getProperty("http://w3id.org/bench#hasNumberOfGenerators", 1);
         int population = (Integer) getProperty("http://w3id.org/bench#hasPopulation", 100);
+        int seed = (Integer) getProperty("http://w3id.org/bench#hasMimickingSeed", 1);
         String serializationFormat = (String) getProperty("http://w3id.org/bench#linkingDataFormat", "ntriples");
         double keepPoints = (double) getProperty("http://w3id.org/bench#keepPoints", 0.3);
 
@@ -51,6 +52,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         envVariablesDataGenerator = new String[]{
             PlatformConstants.NUMBER_OF_DATA_GENERATORS + "=" + numberOfDataGenerators,
             PlatformConstants.GENERATED_POPULATION + "=" + population,
+            PlatformConstants.GENERATED_TOMTOM_SEED + "=" + seed,
             PlatformConstants.GENERATED_DATA_FORMAT + "=" + serializationFormat,
             PlatformConstants.KEEP_POINTS + "=" + keepPoints,
             PlatformConstants.SEVERITY + "=" + severity,

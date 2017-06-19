@@ -10,6 +10,7 @@ public final class PlatformConstants {
     // =============== DATA GENERATOR CONSTANTS ===============
     public static final String NUMBER_OF_DATA_GENERATORS = "number_of_generators";
     public static final String GENERATED_POPULATION = "generator_population";
+    public static final String GENERATED_TOMTOM_SEED = "generator_tomtom_seed";
     public static final String GENERATED_DATA_FORMAT = "generator_data_format";
     public static final String KEEP_POINTS = "keep_points";
     public static final String SEVERITY = "severity";
@@ -25,5 +26,4 @@ public final class PlatformConstants {
     public static final String EVALUATION_FMEASURE = "evaluation_fmeasure";
     public static final String EVALUATION_TIME_PERFORMANCE = "evaluation_time_performance";
 
-   
 }
