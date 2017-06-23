@@ -94,6 +94,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
             long responseReceivedTimestamp) throws Exception {
 
         time_performance = (responseReceivedTimestamp - taskSentTimestamp);
+        if (time_performance < 0) {
+            time_performance = 0;
+        }
         LOGGER.info("time_performance in ms: " + time_performance);
 
 //        this.sumTaskDelay += delay;

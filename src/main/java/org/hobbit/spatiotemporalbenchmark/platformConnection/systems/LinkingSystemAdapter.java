@@ -10,7 +10,6 @@ import com.rabbitmq.client.ShutdownSignalException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.logging.Level;
 import static org.aksw.limes.core.controller.Controller.getConfig;
 import static org.aksw.limes.core.controller.Controller.getMapping;
@@ -63,10 +62,10 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
             dataFormat = RabbitMQUtils.readString(dataBuffer);
             receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
 
-            sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");            
+            sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
 //LOGGER.info("receivedFiles 1 " + Arrays.toString(receivedFiles));
-            receivedGeneratedDataFilePath = receivedFiles[0];
+            receivedGeneratedDataFilePath = "./datasets/SourceDatasets/"+receivedFiles[0];
             LOGGER.info("Received data from receiveGeneratedData..");
 
         } catch (IOException | ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
@@ -86,18 +85,18 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
             String receivedGeneratedTaskFilePath = null;
             try {
 
-                targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "task_target_file");                
+                targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "task_target_file");
                 String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
 //LOGGER.info("receivedFiles 2 " + Arrays.toString(receivedFiles));
-                receivedGeneratedTaskFilePath = receivedFiles[0];
-
+                receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/"+receivedFiles[0];
 
             } catch (ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
                 java.util.logging.Logger.getLogger(LinkingSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             LOGGER.info("Task " + taskId + " received from task generator");
-
+            LOGGER.info("receivedGeneratedDataFilePath " + receivedGeneratedDataFilePath);
+            LOGGER.info("receivedGeneratedTaskFilePath " + receivedGeneratedTaskFilePath);
             linkingController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath);
             byte[][] resultsArray = new byte[1][];
             resultsArray[0] = FileUtils.readFileToByteArray(new File(resultsFile));
@@ -117,6 +116,9 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
     public void linkingController(String source, String target) throws IOException {
 
         LOGGER.info("Started limesController.. ");
+
+        LOGGER.info("source " + source);
+        LOGGER.info("target " + target);
 
         String[] args = new String[1];
         args[0] = "./configs/limesConfig.xml";
@@ -160,7 +162,6 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
         if (Commands.DATA_GENERATION_FINISHED == command) {
             LOGGER.info("my receiveCommand for source");
             sourceReceiver.terminate();
-            
 
         } else if (Commands.TASK_GENERATION_FINISHED == command) {
             LOGGER.info("my receiveCommand for target");
