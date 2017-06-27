@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hobbit.core.components.AbstractDataGenerator;
+import org.hobbit.core.mimic.DockerBasedMimickingAlg;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileSender;
 import org.hobbit.spatiotemporalbenchmark.data.Generator;
@@ -47,12 +48,6 @@ public class DataGenerator extends AbstractDataGenerator {
     private String targetPointsTransformations;
     private String valueBasedTransformations;
 
-//    public static final String SEVERITY = "severity";
-//    public static final String CHANGE_TIMESTAMP = "change_timestamp";    
-//    public static final String SOURCE_POINTS_TO_LABELS = "source_points_to_labels";    
-//    public static final String ADD_REMOVE_POINTS = "add_remove_points";
-//    public static final String TARGET_POINTS_TRANSFORMATIONS = "target_points_transformations";
-//    public static final String VALUE_BASED_TRANSFORMATIONS = "value_based_transformations";
     private int taskId = 0;
 
     public static Generator dataGeneration = new Generator();
@@ -75,6 +70,8 @@ public class DataGenerator extends AbstractDataGenerator {
         // Given the above input, update configuration files that are necessary for data generation
         reInitializeProperties();
 
+        // call mimicking algorithm
+//        runMimicking();
         new PointsAddressesCache();
 
         task = new Task(Integer.toString(taskId++), null, null);
@@ -205,7 +202,7 @@ public class DataGenerator extends AbstractDataGenerator {
         Map<String, String> env = System.getenv();
         serializationFormat = (String) getFromEnv(env, PlatformConstants.GENERATED_DATA_FORMAT, "");
         population = (Integer) getFromEnv(env, PlatformConstants.GENERATED_POPULATION, 0);
-                seed = (Integer) getFromEnv(env, PlatformConstants.GENERATED_TOMTOM_SEED, 0);
+        seed = (Integer) getFromEnv(env, PlatformConstants.GENERATED_TOMTOM_SEED, 0);
         numberOfDataGenerators = (Integer) getFromEnv(env, PlatformConstants.NUMBER_OF_DATA_GENERATORS, 0);
         keepPoints = (float) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0f);
         severity = (float) getFromEnv(env, PlatformConstants.SEVERITY, 0.0f);
@@ -310,6 +307,40 @@ public class DataGenerator extends AbstractDataGenerator {
             allocationsAsDoubles[i] = Double.parseDouble(allocationsAsStrings[i]);
         }
         return allocationsAsDoubles;
+    }
+
+    /**
+     * Initializes and runs a mimicking algorithm.
+     *
+     */
+    public void runMimicking() {
+        LOGGER.info("Running mimicking algorithm ");
+        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
+
+        try {
+            String[] TomTomDataArguments = new String[3];
+            TomTomDataArguments[0] = "HOBBIT_NUM_TRACES=" + population;
+            TomTomDataArguments[1] = "HOBBIT_SEED=" + seed;
+            TomTomDataArguments[2] = "HOBBIT_OUTPUT_FORMAT=rdf"; //what else can be ?
+
+            alg.generateData(givenDatasetsPath, TomTomDataArguments);
+            //print files in folder
+            File[] files = new File(givenDatasetsPath).listFiles();
+//If this pathname does not denote a directory, then listFiles() returns null. 
+            LOGGER.info("files generated from mimicking: " + files.length);
+            for (File file : files) {
+                if (file.isFile()) {
+                    LOGGER.info("file from mimicking: " + file.getName());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("TOMTOM_DATA script terminated.");
+            throw new RuntimeException();
+        }
+
+        LOGGER.info("Mimicking data has been received.");
+
     }
 
     @Override
