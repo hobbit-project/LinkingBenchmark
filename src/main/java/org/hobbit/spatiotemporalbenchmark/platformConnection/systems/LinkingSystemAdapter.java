@@ -24,6 +24,7 @@ import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileReceiver;
+import org.hobbit.spatiotemporalbenchmark.rabbit.SingleFileReceiver;
 import org.hobbit.spatiotemporalbenchmark.util.FileUtil;
 import org.hobbit.spatiotemporalbenchmark.util.SesameUtils;
 import org.slf4j.Logger;
@@ -47,9 +48,13 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
     @Override
     public void init() throws Exception {
         LOGGER.info("Initializing Limes test system...");
+        long time = System.currentTimeMillis();
         super.init();
-        LOGGER.info("Limes initialized successfully .");
-
+        LOGGER.info("Super class initialized. It took {}ms.", System.currentTimeMillis() - time);
+        time = System.currentTimeMillis();
+        sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");
+        LOGGER.info("Receivers initialized. It took {}ms.", System.currentTimeMillis() - time);
+        LOGGER.info("Limes initialized successfully.");
     }
 
     @Override
@@ -62,7 +67,6 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
             dataFormat = RabbitMQUtils.readString(dataBuffer);
             receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
 
-            sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
 //LOGGER.info("receivedFiles 1 " + Arrays.toString(receivedFiles));
             receivedGeneratedDataFilePath = "./datasets/SourceDatasets/"+receivedFiles[0];
@@ -77,22 +81,28 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
     @Override
     public void receiveGeneratedTask(String taskId, byte[] data) {
         LOGGER.info("Starting receiveGeneratedTask..");
+        long time = System.currentTimeMillis();
         try {
 
             ByteBuffer taskBuffer = ByteBuffer.wrap(data);
             // read the file path
             taskFormat = RabbitMQUtils.readString(taskBuffer);
+            LOGGER.info("Parsed task " + taskId + ". It took {}ms.", System.currentTimeMillis() - time);
+            time = System.currentTimeMillis();
             String receivedGeneratedTaskFilePath = null;
             try {
 
-                targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "task_target_file");
+                 targetReceiver = SingleFileReceiver.create(this.incomingDataQueueFactory,
+                        "task_target_file");
                 String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
 //LOGGER.info("receivedFiles 2 " + Arrays.toString(receivedFiles));
                 receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/"+receivedFiles[0];
 
-            } catch (ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
-                java.util.logging.Logger.getLogger(LinkingSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
+             } catch (Exception e) {
+                LOGGER.error("Exception while trying to receive data. Aborting.", e);
             }
+            LOGGER.info("Received task data. It took {}ms.", System.currentTimeMillis() - time);
+            time = System.currentTimeMillis();
 
             LOGGER.info("Task " + taskId + " received from task generator");
             LOGGER.info("receivedGeneratedDataFilePath " + receivedGeneratedDataFilePath);
