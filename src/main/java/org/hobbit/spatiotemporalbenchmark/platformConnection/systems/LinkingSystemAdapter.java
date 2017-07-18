@@ -173,9 +173,9 @@ public class LinkingSystemAdapter extends AbstractSystemAdapter {
             LOGGER.info("my receiveCommand for source");
             sourceReceiver.terminate();
 
-        } else if (Commands.TASK_GENERATION_FINISHED == command) {
-            LOGGER.info("my receiveCommand for target");
-            targetReceiver.terminate();
+//        } else if (Commands.TASK_GENERATION_FINISHED == command) {
+//            LOGGER.info("my receiveCommand for target");
+//            targetReceiver.terminate();
         }
         super.receiveCommand(command, data);
     }
