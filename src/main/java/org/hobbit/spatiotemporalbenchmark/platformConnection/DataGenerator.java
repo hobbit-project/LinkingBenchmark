@@ -309,30 +309,100 @@ public class DataGenerator extends AbstractDataGenerator {
         return allocationsAsDoubles;
     }
 
+//    /**
+//     * Initializes and runs a mimicking algorithm.
+//     *
+//     */
+//    public void runMimicking() {
+//        LOGGER.info("Running mimicking algorithm ");
+//        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
+//
+//        try {
+//            String[] TomTomDataArguments = new String[3];
+//            TomTomDataArguments[0] = "HOBBIT_NUM_TRACES=" + population;
+//            TomTomDataArguments[1] = "HOBBIT_SEED=" + seed;
+//            TomTomDataArguments[2] = "HOBBIT_OUTPUT_FORMAT=rdf"; //what else can be ?
+//
+//            alg.generateData(givenDatasetsPath, TomTomDataArguments);
+//            //print files in folder
+//            File[] files = new File(givenDatasetsPath).listFiles();
+////If this pathname does not denote a directory, then listFiles() returns null. 
+//            LOGGER.info("files generated from mimicking: " + files.length);
+//            for (File file : files) {
+//                if (file.isFile()) {
+//                    LOGGER.info("file from mimicking: " + file.getName());
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            LOGGER.error("TOMTOM_DATA script terminated.");
+//            throw new RuntimeException();
+//        }
+//
+//        LOGGER.info("Mimicking data has been received.");
+//
+//    }
+    
     /**
-     * Initializes and runs a mimicking algorithm.
+     * Initializes and runs a mimicking algorithm. This method should be the one
+     * to generate the traces! We are only using this in order to trim traces
+     * longer than 65536 bytes for SILK experiments
      *
+     * It takes a long time to find such traces.
      */
     public void runMimicking() {
         LOGGER.info("Running mimicking algorithm ");
         DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
 
         try {
-            String[] TomTomDataArguments = new String[3];
-            TomTomDataArguments[0] = "HOBBIT_NUM_TRACES=" + population;
-            TomTomDataArguments[1] = "HOBBIT_SEED=" + seed;
-            TomTomDataArguments[2] = "HOBBIT_OUTPUT_FORMAT=rdf"; //what else can be ?
+            int i = 0;
+            int j = 10;
+            while (i < population) {
+                String[] TomTomDataArguments = new String[3];
+                TomTomDataArguments[0] = "HOBBIT_NUM_TRACES=" + (population * j);
+                TomTomDataArguments[1] = "HOBBIT_SEED=" + seed;
+                TomTomDataArguments[2] = "HOBBIT_OUTPUT_FORMAT=rdf"; //what else can be ?
+                LOGGER.info("population * j " + population * j);
+                
+                
+                long startTime = System.currentTimeMillis();
 
-            alg.generateData(givenDatasetsPath, TomTomDataArguments);
-            //print files in folder
-            File[] files = new File(givenDatasetsPath).listFiles();
-//If this pathname does not denote a directory, then listFiles() returns null. 
-            LOGGER.info("files generated from mimicking: " + files.length);
-            for (File file : files) {
-                if (file.isFile()) {
-                    LOGGER.info("file from mimicking: " + file.getName());
+                alg.generateData(givenDatasetsPath, TomTomDataArguments);
+
+                long endTime = System.currentTimeMillis();
+                long totalTime = endTime - startTime;
+                LOGGER.info("Time needed to generate "+(population * j)+" instances: " +totalTime/1000d +" seconds.");
+                
+                //print files in folder
+                File[] files = new File(givenDatasetsPath).listFiles();
+                
+                ///////////////
+                j = j + 5;
+                
+                long s = System.currentTimeMillis();                
+                LOGGER.info("files generated from mimicking: " + files.length);
+                i = 0;
+                for (File file : files) {
+                    double bytes = file.length();
+//                    LOGGER.info("file from mimicking: " + file.getName());
+//                    LOGGER.info("file bytes " + bytes);
+//                if (file.isFile()) {
+                    if (bytes < 65536) {
+                        i++;
+//                        LOGGER.info("bytes < 65536 " + i);
+                    } else {
+                        file.delete();
+                    }
                 }
+                
+    
+
+                long e = System.currentTimeMillis();
+                long t = e - s;
+                 LOGGER.info("Time to trim:" +t/1000d +" seconds.");
+               
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.error("TOMTOM_DATA script terminated.");
