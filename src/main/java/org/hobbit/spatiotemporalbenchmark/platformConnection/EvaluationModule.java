@@ -1,7 +1,9 @@
 package org.hobbit.spatiotemporalbenchmark.platformConnection;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 
@@ -118,8 +120,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
 
         LOGGER.info("expected " + new String(expected));
 
-        HashMap<String, String> expectedMap = new HashMap<String, String>();
+        HashMap<String, List<String>> expectedMap = new HashMap<String, List<String>>();
         if (dataAnswers != null) {
+            List values = null;
             for (String answer : dataAnswers) {
                 answer = answer.trim();
                 if (answer != null && !answer.equals("")) {
@@ -130,17 +133,26 @@ public class EvaluationModule extends AbstractEvaluationModule {
                     String source = source_temp.substring(source_temp.indexOf("<") + 1);
                     source = source.split(">")[0];
 //                    LOGGER.info("EvaluationModule source from gs " + source);
-                    //check this 
                     //source pred target
                     String target_temp = answer.split("<http://www.w3.org/2002/07/owl#sameAs>")[1];
 //                    LOGGER.info("EvaluationModule target_temp from gs " + target_temp);
                     String target = target_temp.substring(target_temp.indexOf("<") + 1);
                     target = target.split(">")[0];
 //                    LOGGER.info("EvaluationModule target from gs " + target);
-                    expectedMap.put(source, target);
+                    if (!expectedMap.containsKey(source)) {
+                        values = new ArrayList<String>();
+                        values.add(target);
+
+                    } else {
+                        values.add(target);
+                    }
+
+                    //todo i want n-n mapping
+                    expectedMap.put(source, values);
                 }
-                LOGGER.info("expected data into the map: " + expectedMap.toString());
+//                LOGGER.info("expected data into the map: " + expectedMap.toString());
             }
+            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
         }
         // read received data
         LOGGER.info("Read received data");
@@ -151,8 +163,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
         }
 
         LOGGER.info("receivedData----" + new String(receivedData) + "----");
-        HashMap<String, String> receivedMap = new HashMap<String, String>();
+        HashMap<String, List<String>> receivedMap = new HashMap<String, List<String>>();
         if (receivedDataAnswers != null) {
+            List values = null;
             for (String answer : receivedDataAnswers) {
                 answer = answer.trim();
                 if (answer != null && !answer.equals("")) {
@@ -162,33 +175,52 @@ public class EvaluationModule extends AbstractEvaluationModule {
 
                     String target_temp = answer.split(">")[1];
                     String target = target_temp.substring(target_temp.indexOf("<") + 1);
-                    receivedMap.put(source, target);
+                    if (!receivedMap.containsKey(source)) {
+                        values = new ArrayList<String>();
+                        values.add(target);
+
+                    } else {
+                        values.add(target);
+                    }
+
+                    //todo i want n-n mapping
+                    receivedMap.put(source, values);
                 }
-                LOGGER.info("received data into the map: " + receivedMap.toString());
+//                LOGGER.info("received data into the map: " + receivedMap.toString());
             }
+            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
+
         }
 
-        //TODO: check this again
+        //check this again
         if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {
-            for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
+            for (Map.Entry<String, List<String>> expectedEntry : expectedMap.entrySet()) {
                 String expectedKey = expectedEntry.getKey();
-                String expectedValue = expectedEntry.getValue();
+                List<String> expectedValue = expectedEntry.getValue();
 
                 boolean tpFound = false;
-                for (Map.Entry<String, String> receivedEntry : receivedMap.entrySet()) {
-                    tpFound = false;
-                    String receivedKey = receivedEntry.getKey();
-                    String receivedValue = receivedEntry.getValue();
+                for (Map.Entry<String, List<String>> receivedEntry : receivedMap.entrySet()) {
 
-                    if (expectedKey.equals(receivedKey) && expectedValue.equals(receivedValue)) {
-                        tpFound = true;
-                        break;
+                    String receivedKey = receivedEntry.getKey();
+                    List<String> receivedValue = receivedEntry.getValue();
+
+                    if (expectedKey.equals(receivedKey)) {
+                        LOGGER.info("expectedKey.equals(receivedKey)");
+                        for (String answer : expectedValue) {
+                            tpFound = false;
+                            LOGGER.info("answer " + answer + " receivedValue " + receivedValue.toString());
+                            if (receivedValue.contains(answer)) {
+                                tpFound = true;
+                                break;
+                            }
+
+                        }
+                        if (tpFound == true) {
+                            truePositives++;
+                        } else {
+                            falseNegatives++;
+                        }
                     }
-                }
-                if (tpFound == true) {
-                    truePositives++;
-                } else {
-                    falseNegatives++;
                 }
             }
             // what is not TP in the received answers, is a FP
